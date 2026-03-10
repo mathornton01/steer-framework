@@ -1,0 +1,31 @@
+serial over
+close pairs
+collision over
+gcd
+linear complexity
+appearance spacings
+sum collector
+savir2
+coupon collector
+weight distribution
+close pairs bit match
+simplified poker
+gap
+collision permut
+max of t
+run
+permutation
+sample product
+sample mean
+sample correlation
+random walk
+hamming weight
+hamming correlation
+hamming independence
+string run
+autocorrelation
+periods in strings
+longest head run
+fourier spectral
+entropy discretization
+multinomial bits over

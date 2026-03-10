@@ -367,6 +367,38 @@ function checkHostEnvironment () {
 
     doxygenCheck $LABEL_WIDTH "optional"
 
+    # Python checks (for Python-based tests)
+    if command -v python3 &> /dev/null; then
+        PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+        printf "%${LABEL_WIDTH}s: Installed (v%s)\n" "python3" "$PYTHON_VERSION"
+    else
+        printf "%${LABEL_WIDTH}s: Not installed (required for Python tests)\n" "python3"
+    fi
+
+    if python3 -c "import numpy" 2>/dev/null; then
+        printf "%${LABEL_WIDTH}s: Installed\n" "numpy"
+    else
+        printf "%${LABEL_WIDTH}s: Not installed (required for Python tests)\n" "numpy"
+    fi
+
+    if python3 -c "import pandas" 2>/dev/null; then
+        printf "%${LABEL_WIDTH}s: Installed\n" "pandas"
+    else
+        printf "%${LABEL_WIDTH}s: Not installed (required for Python tests)\n" "pandas"
+    fi
+
+    if python3 -c "import sklearn" 2>/dev/null; then
+        printf "%${LABEL_WIDTH}s: Installed\n" "scikit-learn"
+    else
+        printf "%${LABEL_WIDTH}s: Not installed (required for Rubin test)\n" "scikit-learn"
+    fi
+
+    if python3 -c "import scipy" 2>/dev/null; then
+        printf "%${LABEL_WIDTH}s: Installed\n" "scipy"
+    else
+        printf "%${LABEL_WIDTH}s: Not installed (required for Rubin test)\n" "scipy"
+    fi
+
     printIt " "
 	exit 1
 }
@@ -636,6 +668,45 @@ if [ ${#NIST_STS_TEST_FOLDER_NAMES[@]} -eq "0" ]; then
     handleError "Test data names file is empty!"
 fi
 
+# Load Python test lists (optional — not an error if missing)
+if [ -f ./build_files/python_test_names.txt ]; then
+    readarray -t PYTHON_TEST_NAMES < ./build_files/python_test_names.txt
+    while [ ${#PYTHON_TEST_NAMES[@]} -ne 0 ] && [ "${PYTHON_TEST_NAMES[-1]}" = "" ]; do
+        unset PYTHON_TEST_NAMES[-1]
+    done
+else
+    declare -a PYTHON_TEST_NAMES=()
+fi
+
+if [ -f ./build_files/python_test_folder_names.txt ]; then
+    readarray -t PYTHON_TEST_FOLDER_NAMES < ./build_files/python_test_folder_names.txt
+    while [ ${#PYTHON_TEST_FOLDER_NAMES[@]} -ne 0 ] && [ "${PYTHON_TEST_FOLDER_NAMES[-1]}" = "" ]; do
+        unset PYTHON_TEST_FOLDER_NAMES[-1]
+    done
+else
+    declare -a PYTHON_TEST_FOLDER_NAMES=()
+fi
+
+# Load Diehard test lists (optional — not an error if missing)
+if [ -f ./build_files/diehard_test_names.txt ]; then
+    readarray -t DIEHARD_TEST_NAMES < ./build_files/diehard_test_names.txt
+    while [ ${#DIEHARD_TEST_NAMES[@]} -ne 0 ] && [ "${DIEHARD_TEST_NAMES[-1]}" = "" ]; do
+        unset DIEHARD_TEST_NAMES[-1]
+    done
+else
+    declare -a DIEHARD_TEST_NAMES=()
+fi
+
+# Load TestU01 test lists (optional — not an error if missing)
+if [ -f ./build_files/testu01_test_names.txt ]; then
+    readarray -t TESTU01_TEST_NAMES < ./build_files/testu01_test_names.txt
+    while [ ${#TESTU01_TEST_NAMES[@]} -ne 0 ] && [ "${TESTU01_TEST_NAMES[-1]}" = "" ]; do
+        unset TESTU01_TEST_NAMES[-1]
+    done
+else
+    declare -a TESTU01_TEST_NAMES=()
+fi
+
 declare -i VALIDATION_SUCCESS_COUNT=0
 declare -i VALIDATION_FAILURE_COUNT=0
 declare -i TOTAL_VALIDATION_SUCCESS_COUNT=0
@@ -793,6 +864,20 @@ then
         NIST_STS_TEST_NAME_DASH="${NIST_STS_TEST_NAME// /-}"
         NIST_STS_TEST_NAME_UNDERSCORE="${NIST_STS_TEST_NAME// /_}"
         cleanIt "nist_sts_$NIST_STS_TEST_NAME_UNDERSCORE""_test" "./src/nist-sts/""$NIST_STS_TEST_NAME_DASH" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/""$NIST_STS_TEST_NAME_UNDERSCORE""$CLEAN_LOG_PREFIX$CLEAN_TS$LOG_POSTFIX"
+    done
+
+    for DIEHARD_TEST_NAME in "${DIEHARD_TEST_NAMES[@]}"
+    do
+        DIEHARD_TEST_NAME_DASH="${DIEHARD_TEST_NAME// /-}"
+        DIEHARD_TEST_NAME_UNDERSCORE="${DIEHARD_TEST_NAME// /_}"
+        cleanIt "diehard_$DIEHARD_TEST_NAME_UNDERSCORE""_test" "./src/diehard/""$DIEHARD_TEST_NAME_DASH" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/""$DIEHARD_TEST_NAME_UNDERSCORE""$CLEAN_LOG_PREFIX$CLEAN_TS$LOG_POSTFIX"
+    done
+
+    for TESTU01_TEST_NAME in "${TESTU01_TEST_NAMES[@]}"
+    do
+        TESTU01_TEST_NAME_DASH="${TESTU01_TEST_NAME// /-}"
+        TESTU01_TEST_NAME_UNDERSCORE="${TESTU01_TEST_NAME// /_}"
+        cleanIt "testu01_$TESTU01_TEST_NAME_UNDERSCORE""_test" "./src/testu01/""$TESTU01_TEST_NAME_DASH" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/""$TESTU01_TEST_NAME_UNDERSCORE""$CLEAN_LOG_PREFIX$CLEAN_TS$LOG_POSTFIX"
     done
 
     cleanIt "ascii_binary_to_bytes" "./src/ascii-binary-to-bytes" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/ascii_binary_to_bytes$CLEAN_LOG_PREFIX$CLEAN_TS$LOG_POSTFIX"
@@ -961,6 +1046,64 @@ do
     NIST_STS_TEST_NAME_UNDERSCORE="${NIST_STS_TEST_NAME// /_}"
     buildIt "nist_sts_$NIST_STS_TEST_NAME_UNDERSCORE""_test" "./src/nist-sts/""$NIST_STS_TEST_NAME_DASH" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/""$NIST_STS_TEST_NAME_UNDERSCORE""$BUILD_LOG_PREFIX$BUILD_TS$LOG_POSTFIX" ""
 done
+
+# Diehard tests
+for DIEHARD_TEST_NAME in "${DIEHARD_TEST_NAMES[@]}"
+do
+    DIEHARD_TEST_NAME_DASH="${DIEHARD_TEST_NAME// /-}"
+    DIEHARD_TEST_NAME_UNDERSCORE="${DIEHARD_TEST_NAME// /_}"
+    buildIt "diehard_$DIEHARD_TEST_NAME_UNDERSCORE""_test" "./src/diehard/""$DIEHARD_TEST_NAME_DASH" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/""$DIEHARD_TEST_NAME_UNDERSCORE""$BUILD_LOG_PREFIX$BUILD_TS$LOG_POSTFIX" ""
+done
+
+# TestU01 tests
+for TESTU01_TEST_NAME in "${TESTU01_TEST_NAMES[@]}"
+do
+    TESTU01_TEST_NAME_DASH="${TESTU01_TEST_NAME// /-}"
+    TESTU01_TEST_NAME_UNDERSCORE="${TESTU01_TEST_NAME// /_}"
+    buildIt "testu01_$TESTU01_TEST_NAME_UNDERSCORE""_test" "./src/testu01/""$TESTU01_TEST_NAME_DASH" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/""$TESTU01_TEST_NAME_UNDERSCORE""$BUILD_LOG_PREFIX$BUILD_TS$LOG_POSTFIX" ""
+done
+
+# =================================================================================================
+#   Build Python Tests
+# =================================================================================================
+
+if [ ${#PYTHON_TEST_NAMES[@]} -gt 0 ]; then
+    printIt "Building Python tests..."
+
+    # Copy Python SDK to bin directory
+    PYTHON_SDK_DIR="$PROG_DIR/steer_python_sdk"
+    if ! directoryExists "$PYTHON_SDK_DIR"; then
+        createDirectory "$PYTHON_SDK_DIR"
+    fi
+    cp ./sdk/python/steer_sdk.py "$PYTHON_SDK_DIR/"
+
+    for PYTHON_TEST_NAME in "${PYTHON_TEST_NAMES[@]}"
+    do
+        PYTHON_TEST_NAME_DASH="${PYTHON_TEST_NAME// /-}"
+        PYTHON_TEST_NAME_UNDERSCORE="${PYTHON_TEST_NAME// /_}"
+        PYTHON_PROGRAM_NAME="${PYTHON_TEST_NAME_UNDERSCORE}_test"
+        PYTHON_SRC_DIR="./src/python-tests/$PYTHON_TEST_NAME_DASH"
+
+        if [ -d "$PYTHON_SRC_DIR" ]; then
+            # Copy Python test script to SDK directory
+            cp "$PYTHON_SRC_DIR/${PYTHON_PROGRAM_NAME}.py" "$PYTHON_SDK_DIR/"
+
+            # Generate wrapper script in bin directory
+            WRAPPER_PATH="$PROG_DIR/$PYTHON_PROGRAM_NAME"
+            cat > "$WRAPPER_PATH" << PYEOF
+#!/bin/bash
+SCRIPT_DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+SDK_DIR="\$SCRIPT_DIR/steer_python_sdk"
+export PYTHONPATH="\$SDK_DIR:\$PYTHONPATH"
+exec python3 "\$SDK_DIR/${PYTHON_PROGRAM_NAME}.py" "\$@"
+PYEOF
+            chmod +x "$WRAPPER_PATH"
+            printIt "  Built $PYTHON_PROGRAM_NAME (Python)"
+        else
+            printIt "  WARNING: Source directory not found for Python test '$PYTHON_TEST_NAME' at $PYTHON_SRC_DIR"
+        fi
+    done
+fi
 
 buildIt "ascii_binary_to_bytes" "./src/ascii-binary-to-bytes" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/ascii_binary_to_bytes$BUILD_LOG_PREFIX$BUILD_TS$LOG_POSTFIX" ""
 buildIt "libsteer_unit_test" "./test/unit-test/libsteer-public" makefile $BUILD_VERBOSE "$BUILD_LOGS_DIR/libsteer_unit_test$BUILD_LOG_PREFIX$BUILD_TS$LOG_POSTFIX" ""

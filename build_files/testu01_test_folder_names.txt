@@ -1,0 +1,15 @@
+SerialOver
+ClosePairs
+CollisionOver
+GCD
+LinearComplexity
+AppearanceSpacings
+SumCollector
+Savir2
+CouponCollector
+WeightDistribution
+ClosePairsBitMatch
+SimplifiedPoker
+Gap
+CollisionPermut
+MaxOfT

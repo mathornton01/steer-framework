@@ -1,0 +1,28 @@
+birthday spacings
+parking lot
+minimum distance
+squeeze
+overlapping permutations
+rank 32x32
+rank 6x8
+bitstream
+opso
+oqso
+dna
+count 1s stream
+count 1s byte
+3dsphere
+sums
+runs
+craps
+marsaglia tsang gcd
+dab bytedistrib
+dab dct
+dab filltree
+dab filltree2
+dab monobit2
+rgb bitdist
+rgb minimum distance
+rgb permutations
+rgb lagged sum
+rgb kstest
