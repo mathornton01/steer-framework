@@ -1375,6 +1375,31 @@ then
         cp "$PROG_DIR"/nist_sts_"$NIST_STS_TEST_NAME_UNDERSCORE"_test "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
     done
 
+    for DIEHARD_TEST_NAME in "${DIEHARD_TEST_NAMES[@]}"
+    do
+        DIEHARD_TEST_NAME_UNDERSCORE="${DIEHARD_TEST_NAME// /_}"
+        cp "$PROG_DIR"/diehard_"$DIEHARD_TEST_NAME_UNDERSCORE"_test "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
+    done
+
+    for TESTU01_TEST_NAME in "${TESTU01_TEST_NAMES[@]}"
+    do
+        TESTU01_TEST_NAME_UNDERSCORE="${TESTU01_TEST_NAME// /_}"
+        cp "$PROG_DIR"/testu01_"$TESTU01_TEST_NAME_UNDERSCORE"_test "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
+    done
+
+    if [ ${#PYTHON_TEST_NAMES[@]} -gt 0 ]; then
+        PYTHON_SDK_PKG_DIR="$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin/steer_python_sdk"
+        if ! directoryExists "$PYTHON_SDK_PKG_DIR"; then
+            createDirectory "$PYTHON_SDK_PKG_DIR"
+        fi
+        cp "$PROG_DIR"/steer_python_sdk/*.py "$PYTHON_SDK_PKG_DIR/"
+        for PYTHON_TEST_NAME in "${PYTHON_TEST_NAMES[@]}"
+        do
+            PYTHON_TEST_NAME_UNDERSCORE="${PYTHON_TEST_NAME// /_}"
+            cp "$PROG_DIR"/"${PYTHON_TEST_NAME_UNDERSCORE}_test" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
+        done
+    fi
+
     cp "$PROG_DIR"/steer_run_validations "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
     cp "$PROG_DIR"/steer_test_scheduler "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
     cp "$PROG_DIR"/steer_validate "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/bin"
@@ -1442,6 +1467,38 @@ then
         cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/images/anametric-logo.png" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/images/"
         cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/images/ddics-logo.png" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/images/"
         cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/images/steer-blue-logo.png" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/images/"
+    fi
+
+    if fileExists "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/STEER_GUI_User_Guide.md"
+    then
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/STEER_GUI_User_Guide.md" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/"
+    fi
+
+    printIt "\tCopying GUI application..."
+    if directoryExists "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui"
+    then
+        createDirectory "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/main.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/main_window.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/test_registry.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/test_runner.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/report_viewer.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/docs_viewer.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/splash_screen.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        cp "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/theme.py" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/"
+        if directoryExists "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/resources"
+        then
+            createDirectory "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/resources"
+            cp -R "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/src/steer-gui/resources/" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/gui/resources/"
+        fi
+    fi
+
+    printIt "\tCopying test documentation..."
+    if directoryExists "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/tests"
+    then
+        createDirectory "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/docs"
+        createDirectory "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/docs/tests"
+        cp -R "$BUILD_ROOT/$BUILD_PRODUCTS_DIR_NAME/docs/tests/" "$BUILD_PRODUCTS_PACKAGE_DIR/STEER/docs/tests/"
     fi
 
     printIt "\tCreating package archive..."

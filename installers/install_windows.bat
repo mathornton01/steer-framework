@@ -4,7 +4,7 @@
 :: =================================================================================================
 :: This script sets up the STEER Framework on Windows, including:
 ::   - Python dependency installation
-::   - WSL setup check for running C-based NIST tests
+::   - WSL setup check for running C-based tests (NIST STS, Diehard, TestU01)
 ::   - Desktop shortcut creation
 ::   - PATH configuration
 :: =================================================================================================
@@ -45,16 +45,16 @@ echo.
 echo Installing Python dependencies...
 echo.
 
-pip install PyQt6>=6.7.0 2>nul
+pip install "PyQt6>=6.7.0" 2>nul
 if errorlevel 1 (
     echo [WARN] Could not install PyQt6. Trying with --user flag...
-    pip install --user PyQt6>=6.7.0
+    pip install --user "PyQt6>=6.7.0"
 )
 
 :: Install dependencies for causal model tests
-pip install numpy>=1.21.0 pandas>=1.3.0 scikit-learn>=1.0.0 scipy>=1.7.0 2>nul
+pip install "numpy>=1.21.0" "pandas>=1.3.0" "scikit-learn>=1.0.0" "scipy>=1.7.0" 2>nul
 if errorlevel 1 (
-    pip install --user numpy>=1.21.0 pandas>=1.3.0 scikit-learn>=1.0.0 scipy>=1.7.0
+    pip install --user "numpy>=1.21.0" "pandas>=1.3.0" "scikit-learn>=1.0.0" "scipy>=1.7.0"
 )
 
 echo.
@@ -62,11 +62,11 @@ echo [OK] Python dependencies installed.
 
 :: Check for WSL
 echo.
-echo Checking for WSL (needed to run NIST C tests)...
+echo Checking for WSL (needed to run C-based tests: NIST STS, Diehard, TestU01)...
 wsl --status >nul 2>&1
 if errorlevel 1 (
     echo [WARN] WSL is not installed.
-    echo        NIST C tests require WSL with Ubuntu.
+    echo        C-based tests ^(NIST STS, Diehard, TestU01^) require WSL with Ubuntu.
     echo        Install WSL: wsl --install -d Ubuntu-24.04
     echo        The GUI will still work but C tests will be unavailable.
 ) else (
@@ -83,8 +83,16 @@ if errorlevel 1 (
 
 :: Build STEER C tests in WSL (if available)
 echo.
-echo Building STEER C tests...
-wsl -d Ubuntu-24.04 -- bash -c "cd '%FRAMEWORK_ROOT:\=/%' 2>/dev/null && bash build.sh" 2>nul
+echo Building STEER C tests (NIST STS, Diehard, TestU01)...
+
+:: Convert Windows path to WSL /mnt/ path
+set "WSL_ROOT=%FRAMEWORK_ROOT%"
+set "WSL_ROOT=%WSL_ROOT:\=/%"
+set "WSL_ROOT=%WSL_ROOT:C:=/mnt/c%"
+set "WSL_ROOT=%WSL_ROOT:D:=/mnt/d%"
+set "WSL_ROOT=%WSL_ROOT:E:=/mnt/e%"
+
+wsl -d Ubuntu-24.04 -- bash -c "cd '%WSL_ROOT%' && bash build.sh" 2>nul
 if errorlevel 1 (
     echo [WARN] Could not build C tests. They may need to be built manually in WSL.
 ) else (
@@ -108,11 +116,15 @@ echo [OK] Launcher created: %LAUNCHER%
 echo.
 echo Creating desktop shortcut...
 
-set "DESKTOP=%USERPROFILE%\Desktop"
+:: Detect actual Desktop path (handles OneDrive redirect)
+for /f "tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop 2^>nul') do set "DESKTOP=%%b"
+if not defined DESKTOP set "DESKTOP=%USERPROFILE%\Desktop"
+:: Expand environment variables in the path
+call set "DESKTOP=%DESKTOP%"
 set "SHORTCUT=%DESKTOP%\STEER Framework.lnk"
 
 :: Use PowerShell to create .lnk shortcut
-powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%SHORTCUT%'); $s.TargetPath = '%LAUNCHER%'; $s.WorkingDirectory = '%FRAMEWORK_ROOT%'; $s.Description = 'STEER Framework - Statistical Testing of Entropy'; $s.WindowStyle = 7; $s.Save()"
+powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%SHORTCUT%'); $s.TargetPath = '%LAUNCHER%'; $s.WorkingDirectory = '%FRAMEWORK_ROOT%'; $s.Description = 'STEER Framework - Statistical Testing of Entropy'; $s.WindowStyle = 7; $s.Save()" 2>nul
 
 if exist "%SHORTCUT%" (
     echo [OK] Desktop shortcut created.
@@ -147,8 +159,9 @@ echo   Launch GUI:        steer-gui.bat
 echo   View docs (CLI):   steer-docs.bat --list
 echo   Desktop shortcut:  %SHORTCUT%
 echo.
-echo   Note: To run NIST C tests, ensure WSL with Ubuntu-24.04 is set up
-echo         and the framework is built (run build.sh in WSL).
+echo   Note: To run C-based tests (NIST STS, Diehard, TestU01), ensure WSL
+echo         with Ubuntu-24.04 is set up and the framework is built
+echo         (run build.sh in WSL).
 echo.
 
 pause
