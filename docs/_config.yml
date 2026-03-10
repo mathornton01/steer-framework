@@ -1,0 +1,15 @@
+title: STEER Framework
+description: Statistical Testing of Entropy Evaluation Report
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+logo: /docs/images/steer-blue-logo.png
+
+exclude:
+  - Doxyfile
+  - html/
+  - latex/
+  - nist/
+  - papers/
+  - schemas/
