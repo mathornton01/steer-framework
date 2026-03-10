@@ -20,3 +20,7 @@
 /build_files_bu
 src/run-validations/validation_checks_bu.json
 src/test-scheduler/validation_test_schedule_bu.json
+__pycache__/
+*.pyc
+.pytest_cache/
+.claude/
