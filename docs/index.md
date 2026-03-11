@@ -40,6 +40,14 @@ title: Anametric STEER
   </div>
 </div>
 
+<div class="video-placeholder">
+  <div class="video-placeholder-inner">
+    <div class="video-play-icon">&#9654;</div>
+    <p class="video-placeholder-title">Demo Video</p>
+    <p class="video-placeholder-sub">Coming soon — a walkthrough of the Anametric STEER GUI and test workflow.</p>
+  </div>
+</div>
+
 ---
 
 <div class="battery-grid">

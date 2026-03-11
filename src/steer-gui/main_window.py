@@ -503,6 +503,7 @@ class MainWindow(QMainWindow):
 
         # ── Column 2: Plan + Parameters ───────────────────────────────────────
         col2 = QWidget()
+        col2.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         col2_layout = QVBoxLayout(col2)
         col2_layout.setContentsMargins(0, 0, 0, 0)
         col2_layout.setSpacing(4)
@@ -515,6 +516,8 @@ class MainWindow(QMainWindow):
         self.plan_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.plan_list.setTextElideMode(Qt.TextElideMode.ElideRight)
         self.plan_list.setWordWrap(True)
+        self.plan_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.plan_list.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
         col2_layout.addWidget(self.plan_list, 1)
 
         plan_btn_row = QHBoxLayout()
@@ -529,6 +532,7 @@ class MainWindow(QMainWindow):
 
         # Parameters (compact, within column 2)
         param_group = QGroupBox("Parameters")
+        param_group.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         pg_layout = QVBoxLayout(param_group)
         pg_layout.setSpacing(4)
         pg_layout.setContentsMargins(6, 14, 6, 6)
@@ -547,12 +551,14 @@ class MainWindow(QMainWindow):
         self.bitstream_count = QSpinBox()
         self.bitstream_count.setRange(1, 10000)
         self.bitstream_count.setValue(1)
+        self.bitstream_count.setMinimumWidth(0)
         cg.addWidget(self.bitstream_count, 0, 1)
         cg.addWidget(QLabel("Len:"), 0, 2)
         self.bitstream_length = QSpinBox()
         self.bitstream_length.setRange(1024, 100000000)
         self.bitstream_length.setSingleStep(100000)
         self.bitstream_length.setValue(1000000)
+        self.bitstream_length.setMinimumWidth(0)
         cg.addWidget(self.bitstream_length, 0, 3)
         cg.addWidget(QLabel("Alpha:"), 1, 0)
         self.alpha_spin = QDoubleSpinBox()
@@ -560,10 +566,13 @@ class MainWindow(QMainWindow):
         self.alpha_spin.setDecimals(4)
         self.alpha_spin.setSingleStep(0.01)
         self.alpha_spin.setValue(0.01)
+        self.alpha_spin.setMinimumWidth(0)
         cg.addWidget(self.alpha_spin, 1, 1)
         cg.addWidget(QLabel("Report:"), 1, 2)
         self.level_combo = QComboBox()
         self.level_combo.addItems(["full", "standard", "summary"])
+        self.level_combo.setMinimumWidth(0)
+        self.level_combo.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
         cg.addWidget(self.level_combo, 1, 3)
         pg_layout.addLayout(cg)
 
