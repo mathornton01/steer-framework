@@ -186,7 +186,6 @@ QComboBox {{
     border: 1px solid {c['border']};
     border-radius: 4px;
     padding: 6px 10px;
-    min-width: 120px;
 }}
 
 QComboBox:hover {{
@@ -342,9 +341,9 @@ QGroupBox QPushButton {{
     color: {c['text_primary']};
     border: 1px solid {c['btn_border']};
     border-radius: 4px;
-    padding: 6px 16px;
+    padding: 4px 10px;
     font-weight: 500;
-    min-height: 20px;
+    min-height: 18px;
 }}
 
 QGroupBox QPushButton:hover {{
@@ -537,7 +536,7 @@ QSpinBox, QDoubleSpinBox {{
     color: {c['text_primary']};
     border: 1px solid {c['border']};
     border-radius: 4px;
-    padding: 6px 10px;
+    padding: 4px 6px;
 }}
 
 QSpinBox:focus, QDoubleSpinBox:focus {{

@@ -90,7 +90,7 @@ title: Anametric STEER
 
 <div class="carousel-section">
 
-## GUI Application
+<h2>GUI Application</h2>
 
 <p class="section-subtitle">Select tests, configure parameters, execute runs, and review results — all from a modern graphical interface.</p>
 
