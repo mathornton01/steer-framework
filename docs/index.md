@@ -6,26 +6,41 @@ title: Anametric STEER
 <div class="hero">
   <div class="hero-logos">
     <img src="images/Ana_color_horiz_V2.svg" alt="Anametric" class="hero-logo-anametric">
-    <span class="hero-logo-divider">×</span>
+    <span class="hero-logo-divider">&times;</span>
     <img src="images/steer-blue-logo.png" alt="STEER" class="hero-logo-steer">
   </div>
   <h1>Anametric <strong>STEER</strong></h1>
   <p class="subtitle">Statistical Testing of Entropy Evaluation Report</p>
-  <p class="subtitle" style="font-size:0.9rem; margin-top:4px; color:var(--text-muted);">
-    A comprehensive framework for evaluating random number generators and entropy sources through rigorous statistical &amp; causal testing.
+  <p class="subtitle" style="font-size:0.85rem; margin-top:4px; color:var(--text-muted);">
+    Rigorous statistical &amp; causal evaluation of random number generators and entropy sources.
   </p>
   <div class="hero-links">
     <a href="#getting-started" class="btn-primary">Get Started</a>
     <a href="STEER_GUI_User_Guide" class="btn-outline">GUI Guide</a>
-    <a href="https://github.com/mathornton01/steer-framework" class="btn-outline" target="_blank">View on GitHub</a>
+    <a href="https://github.com/mathornton01/steer-framework" class="btn-outline" target="_blank">GitHub &nearr;</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-number">76</span>
+    <span class="stat-label">Statistical Tests</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">4</span>
+    <span class="stat-label">Test Batteries</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">2</span>
+    <span class="stat-label">Causal Models</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">3</span>
+    <span class="stat-label">Platforms</span>
   </div>
 </div>
 
 ---
-
-## Overview
-
-Anametric STEER improves the accessibility, usability, and scalability of statistical entropy testing. It implements **76 statistical tests** across four major test batteries, all accessible through both a command-line interface and a modern graphical application.
 
 <div class="battery-grid">
   <div class="battery-card">
@@ -34,100 +49,135 @@ Anametric STEER improves the accessibility, usability, and scalability of statis
     <p>SP 800-22 Rev 1a — the worldwide standard for RNG certification.</p>
   </div>
   <div class="battery-card">
-    <h4>Diehard / Dieharder</h4>
+    <h4>Diehard</h4>
     <p><span class="count">28</span> tests</p>
-    <p>Marsaglia, Bauer (DAB), and Brown (RGB) battery suites.</p>
+    <p>Marsaglia, Bauer, and Brown battery suites.</p>
   </div>
   <div class="battery-card">
-    <h4>TestU01 Crush</h4>
+    <h4>TestU01</h4>
     <p><span class="count">31</span> tests</p>
-    <p>Pierre L'Ecuyer's stringent test library.</p>
+    <p>L'Ecuyer's stringent test library.</p>
   </div>
   <div class="battery-card featured">
-    <h4>Causal Model Tests</h4>
+    <h4>Causal Models</h4>
     <p><span class="count">2</span> tests</p>
-    <p>Pearl &amp; Rubin causal inference — <em>an Anametric innovation.</em></p>
+    <p>Pearl &amp; Rubin causal inference — <em>Anametric innovation.</em></p>
   </div>
 </div>
 
 <div class="causal-highlight">
-  <h3><span class="badge">Featured</span> Causal Inference Test Battery</h3>
+  <h3><span class="badge">New</span> Causal Inference Test Battery</h3>
   <p>
-    Anametric STEER uniquely integrates <strong>causal inference methodology</strong> into entropy evaluation — going beyond correlation to probe whether deviations from randomness arise from genuine structural patterns.
+    <strong>Pearl Causal Model (PCM)</strong> — Structural causal modeling detects directional dependencies in bitstreams that violate randomness assumptions.
   </p>
   <p>
-    <strong>Pearl Causal Model (PCM)</strong> — Uses structural causal modeling to test whether observed bit patterns exhibit directional causal dependencies that a truly random source should not produce.
+    <strong>Rubin Causal Model (RCM)</strong> — Potential outcomes framework identifies treatment-effect-like deviations across bitstream subpopulations.
   </p>
-  <p>
-    <strong>Rubin Causal Model (RCM)</strong> — Applies the potential-outcomes framework to evaluate whether subpopulations of a bitstream show treatment-effect-like deviations, indicating non-random structure.
-  </p>
-  <p style="margin-top:16px; font-size:0.9rem; color:var(--text-muted);">
-    These tests complement traditional statistical batteries by detecting failure modes that frequency- and pattern-based tests may miss.
+  <p style="margin-top:12px; font-size:0.82rem; color:var(--text-muted);">
+    These tests detect failure modes that purely statistical batteries may miss.
   </p>
 </div>
 
 ---
 
+<div class="carousel-section">
+
 ## GUI Application
 
-The Anametric STEER GUI provides a complete graphical interface for selecting tests, configuring parameters, executing test runs, and reviewing results — all without touching the command line.
+<p class="section-subtitle">Select tests, configure parameters, execute runs, and review results — all from a modern graphical interface.</p>
 
-### Main Window
+<div class="carousel-wrapper">
+  <button class="carousel-arrow prev" aria-label="Previous">&lsaquo;</button>
+  <div class="carousel-viewport">
+    <div class="carousel-track">
+      <div class="carousel-slide">
+        <img src="screenshots/gui-main-window.svg" alt="STEER GUI Main Window">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-test-selection.svg" alt="Test Selection">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-parameters.svg" alt="Parameter Configuration">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-running.svg" alt="Test Execution">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-results-summary.svg" alt="Results Summary">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-results-details.svg" alt="Results Details">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-documentation.svg" alt="Documentation Browser">
+      </div>
+    </div>
+  </div>
+  <button class="carousel-arrow next" aria-label="Next">&rsaquo;</button>
 
-<p align="center">
-  <img src="screenshots/gui-main-window.svg" alt="STEER GUI Main Window" width="900"><br>
-  <em>The main Anametric STEER GUI window with test selection, parameter configuration, and results display.</em>
-</p>
+  <!-- Reflection layers (one per slide, toggled by JS) -->
+  <div class="carousel-reflection"><img src="screenshots/gui-main-window.svg" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-test-selection.svg" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-parameters.svg" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-running.svg" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-results-summary.svg" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-results-details.svg" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-documentation.svg" alt=""></div>
 
-### Test Selection and Planning
+  <!-- Captions (one per slide, toggled by JS) -->
+  <div class="carousel-caption"><h4>Main Window</h4><p>Three-panel layout with test browser, parameters, and results.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Test Selection</h4><p>Browse all 76 tests across NIST STS, Diehard, TestU01, and Causal batteries.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Parameter Configuration</h4><p>Common settings and test-specific parameters like block size, dimensions, and significance level.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Test Execution</h4><p>Real-time progress tracking with live output streaming.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Results Summary</h4><p>Pass/fail evaluation with probability values at a glance.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Results Details</h4><p>Hierarchical breakdown of configurations, calculations, and evaluation criteria.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Documentation Browser</h4><p>Mathematical basis, parameter descriptions, and usage guidance for every test.</p></div>
 
-Browse all 76 tests organized by battery. Select individual tests or entire batteries, configure parameters, and queue them for execution.
+  <div class="carousel-dots">
+    <button class="carousel-dot active" aria-label="Slide 1"></button>
+    <button class="carousel-dot" aria-label="Slide 2"></button>
+    <button class="carousel-dot" aria-label="Slide 3"></button>
+    <button class="carousel-dot" aria-label="Slide 4"></button>
+    <button class="carousel-dot" aria-label="Slide 5"></button>
+    <button class="carousel-dot" aria-label="Slide 6"></button>
+    <button class="carousel-dot" aria-label="Slide 7"></button>
+  </div>
+</div>
 
-<p align="center">
-  <img src="screenshots/gui-test-selection.svg" alt="Test Selection" width="900"><br>
-  <em>Selecting tests from the NIST STS, Diehard, TestU01, and Causal Model batteries.</em>
-</p>
+</div>
 
-### Parameter Configuration
+---
 
-Each test exposes configurable parameters — common settings like bitstream count, length, and significance level, plus test-specific parameters like dimension, block size, or tuple size.
-
-<p align="center">
-  <img src="screenshots/gui-parameters.svg" alt="Parameter Configuration" width="900"><br>
-  <em>Configuring common and test-specific parameters for a planned test.</em>
-</p>
-
-### Test Execution
-
-Run your test plan with real-time progress tracking. Tests execute sequentially with live output streaming to the log.
-
-<p align="center">
-  <img src="screenshots/gui-running.svg" alt="Test Execution" width="900"><br>
-  <em>Test execution in progress with real-time progress tracking.</em>
-</p>
-
-### Results and Reporting
-
-View results in a structured summary, drill into detailed hierarchical breakdowns, or examine the raw JSON report with syntax highlighting.
-
-<p align="center">
-  <img src="screenshots/gui-results-summary.svg" alt="Results Summary" width="900"><br>
-  <em>Test results summary showing pass/fail evaluation and probability values.</em>
-</p>
-
-<p align="center">
-  <img src="screenshots/gui-results-details.svg" alt="Results Details" width="900"><br>
-  <em>Detailed hierarchical view of test configurations, calculations, and criteria.</em>
-</p>
-
-### Integrated Documentation
-
-Browse comprehensive documentation for every test directly within the application — including mathematical basis, parameter descriptions, result interpretation, and recommendations.
-
-<p align="center">
-  <img src="screenshots/gui-documentation.svg" alt="Documentation Browser" width="900"><br>
-  <em>Built-in documentation browser with mathematical details and usage guidance.</em>
-</p>
+<div class="feature-grid">
+  <div class="feature-item">
+    <span class="feature-icon">&#9881;</span>
+    <div>
+      <h4>CLI &amp; GUI</h4>
+      <p>Full command-line interface with JSON scheduling plus a PyQt6 desktop application.</p>
+    </div>
+  </div>
+  <div class="feature-item">
+    <span class="feature-icon">&#9733;</span>
+    <div>
+      <h4>76 Tests, 4 Batteries</h4>
+      <p>NIST STS, Diehard/Dieharder, TestU01 Crush, and causal inference models.</p>
+    </div>
+  </div>
+  <div class="feature-item">
+    <span class="feature-icon">&#128202;</span>
+    <div>
+      <h4>Structured Reporting</h4>
+      <p>JSON reports with hierarchical detail, summary views, and syntax-highlighted output.</p>
+    </div>
+  </div>
+  <div class="feature-item">
+    <span class="feature-icon">&#128736;</span>
+    <div>
+      <h4>Cross-Platform</h4>
+      <p>Windows, Linux, and macOS with platform-specific installers and build scripts.</p>
+    </div>
+  </div>
+</div>
 
 ---
 
@@ -135,7 +185,7 @@ Browse comprehensive documentation for every test directly within the applicatio
 
 ### NIST Statistical Test Suite (15 tests)
 
-The foundational battery from [NIST SP 800-22](https://csrc.nist.gov/publications/detail/sp/800-22/rev-1a/final), used worldwide for certifying random number generators:
+The foundational battery from [NIST SP 800-22](https://csrc.nist.gov/publications/detail/sp/800-22/rev-1a/final):
 
 - Frequency (Monobit), Block Frequency, Runs, Longest Run of Ones
 - Rank, Discrete Fourier Transform, Non-overlapping Template Matching
@@ -145,30 +195,22 @@ The foundational battery from [NIST SP 800-22](https://csrc.nist.gov/publication
 
 ### Diehard / Dieharder Battery (28 tests)
 
-The complete Dieharder battery combining George Marsaglia's original Diehard tests with extensions by David Bauer (DAB) and Robert G. Brown (RGB):
+Marsaglia's original Diehard tests plus extensions by Bauer (DAB) and Brown (RGB):
 
-**Original Marsaglia Tests:** Birthday Spacings, Parking Lot, Minimum Distance, Squeeze, Overlapping Permutations, Rank 32x32, Rank 6x8, Bitstream, OPSO, OQSO, DNA, Count 1s (Stream & Byte), 3D Sphere, Sums, Runs, Craps, Marsaglia-Tsang GCD
-
-**DAB Extensions:** Bytedistrib, DCT, Filltree, Filltree2, Monobit2
-
-**RGB Extensions:** Bitdist, Minimum Distance, Permutations, Lagged Sum, KS Test
-
-> **Suite Warnings:** Some tests carry warnings from the original Dieharder suite — OPSO, OQSO, and DNA are marked as *suspect*; Sums is *deprecated*; RGB Lagged Sum is known for *false positives*; DAB Filltree is marked as *potentially unreliable*.
+- **Marsaglia:** Birthday Spacings, Parking Lot, Minimum Distance, Squeeze, Overlapping Permutations, Rank 32x32, Rank 6x8, Bitstream, OPSO, OQSO, DNA, Count 1s, 3D Sphere, Sums, Runs, Craps, GCD
+- **DAB:** Bytedistrib, DCT, Filltree, Filltree2, Monobit2
+- **RGB:** Bitdist, Minimum Distance, Permutations, Lagged Sum, KS Test
 
 ### TestU01 Crush Battery (31 tests)
 
-Tests from Pierre L'Ecuyer's TestU01 library, widely regarded as one of the most stringent test suites available:
+L'Ecuyer's TestU01 library — among the most stringent suites available:
 
-Serial Over, Close Pairs, Collision Over, GCD, Linear Complexity, Appearance Spacings, Sum Collector, Savir2, Coupon Collector, Weight Distribution, Close Pairs Bit Match, Simplified Poker, Gap, Collision Permut, Max of T, Run, Permutation, Sample Product, Sample Mean, Sample Correlation, Random Walk, Hamming Weight/Correlation/Independence, String Run, Autocorrelation, Periods in Strings, Longest Head Run, Fourier Spectral, Entropy Discretization, Multinomial Bits Over
+Serial Over, Close Pairs, Collision Over, GCD, Linear Complexity, Appearance Spacings, Sum Collector, Savir2, Coupon Collector, Weight Distribution, Close Pairs Bit Match, Simplified Poker, Gap, Collision Permut, Max of T, Run, Permutation, Sample Product, Sample Mean, Sample Correlation, Random Walk, Hamming, String Run, Autocorrelation, Periods in Strings, Longest Head Run, Fourier Spectral, Entropy Discretization, Multinomial Bits Over
 
 ### Causal Model Tests (2 tests) — <em style="color:var(--accent-gold);">Anametric Innovation</em>
 
-Python-based tests applying causal inference methodology to entropy evaluation — a capability unique to Anametric STEER:
-
-- **Pearl Causal Model (PCM)** — Structural causal modeling to detect directional dependencies in bitstreams that violate randomness assumptions
-- **Rubin Causal Model (RCM)** — Potential outcomes framework to identify treatment-effect-like deviations across bitstream subpopulations
-
-These tests detect failure modes that purely statistical batteries may miss, providing deeper insight into RNG quality.
+- **Pearl Causal Model (PCM)** — Structural causal modeling to detect directional dependencies
+- **Rubin Causal Model (RCM)** — Potential outcomes framework to identify treatment-effect-like deviations
 
 ---
 
@@ -182,19 +224,11 @@ cd steer-framework\installers
 install_windows.bat
 ```
 
-**Linux:**
+**Linux / macOS:**
 ```bash
 cd steer-framework/installers
-bash install_linux.sh
+bash install_linux.sh   # or install_macos.sh
 ```
-
-**macOS:**
-```bash
-cd steer-framework/installers
-bash install_macos.sh
-```
-
-The installer handles Python dependencies, C compiler setup, building all 74 test binaries, and creating GUI launcher shortcuts.
 
 ### Build from Source
 
@@ -210,20 +244,13 @@ bash build.sh
 python src/steer-gui/main.py
 ```
 
-Or use the launcher created by the installer (`steer-gui` on Linux/macOS, `steer-gui.bat` on Windows).
-
 ### Run Tests via CLI
 
 ```bash
-# Run a single test
 ./bin/linux/x64/Debug/nist_sts_frequency_test \
   -l full -e data/random.bin \
   -p test/validation/nist-sts/frequency/parameters_pi.json \
   -r results/frequency_report.json -R
-
-# Run a test schedule
-./bin/linux/x64/Debug/steer_test_scheduler \
-  -s schedules/validation_test_schedule.json
 ```
 
 ---
@@ -233,19 +260,16 @@ Or use the launcher created by the installer (`steer-gui` on Linux/macOS, `steer
 ```
 steer-framework/
 ├── src/
-│   ├── nist-sts/          # 15 NIST STS test implementations (C)
-│   ├── diehard/           # 28 Diehard test implementations (C)
-│   ├── testu01/           # 31 TestU01 test implementations (C)
-│   ├── python-tests/      # 2 causal model tests (Python)
-│   └── steer-gui/         # PyQt6 graphical application
-├── include/               # STEER C library headers
-├── docs/                  # User Guide, Developer Guide, GUI Guide
-├── build_files/           # Test name registries and build templates
-├── installers/            # Platform-specific installers
-└── sdk/python/            # Python SDK for test integration
+│   ├── nist-sts/       # 15 NIST STS tests (C)
+│   ├── diehard/        # 28 Diehard tests (C)
+│   ├── testu01/        # 31 TestU01 tests (C)
+│   ├── python-tests/   # Causal model tests (Python)
+│   └── steer-gui/      # PyQt6 application
+├── include/            # STEER C library headers
+├── docs/               # Guides & documentation
+├── installers/         # Platform installers
+└── sdk/python/         # Python SDK
 ```
-
-Each C test implements the STEER test shell API with 7 standard callbacks (`GetTestInfo`, `GetParametersInfo`, `InitTest`, `GetConfigurationCount`, `SetReport`, `ExecuteTest`, `FinalizeTest`) ensuring consistent parameter handling, reporting, and evaluation across all batteries.
 
 ---
 
