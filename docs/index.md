@@ -1,67 +1,93 @@
 ---
 layout: default
-title: STEER Framework
+title: Anametric STEER
 ---
 
-<p align="center">
-  <img src="images/steer-blue-logo.png" alt="STEER Framework Logo" width="320">
-</p>
-
-<h2 align="center">Statistical Testing of Entropy Evaluation Report</h2>
-
-<p align="center">
-  A comprehensive, open-source framework for evaluating the quality of random number generators and entropy sources through rigorous statistical testing.
-</p>
-
-<p align="center">
-  <a href="https://github.com/mathornton01/steer-framework">View on GitHub</a> &middot;
-  <a href="#getting-started">Getting Started</a> &middot;
-  <a href="STEER_User_Guide">CLI Guide</a> &middot;
-  <a href="STEER_GUI_User_Guide">GUI Guide</a>
-</p>
+<div class="hero">
+  <img src="images/anametric-logo.png" alt="Anametric" class="hero-logo">
+  <h1>Anametric <strong>STEER</strong></h1>
+  <p class="subtitle">Statistical Testing of Entropy Evaluation Report</p>
+  <p class="subtitle" style="font-size:0.9rem; margin-top:4px; color:var(--text-muted);">
+    A comprehensive framework for evaluating random number generators and entropy sources through rigorous statistical &amp; causal testing.
+  </p>
+  <div class="hero-links">
+    <a href="#getting-started" class="btn-primary">Get Started</a>
+    <a href="STEER_GUI_User_Guide" class="btn-outline">GUI Guide</a>
+    <a href="https://github.com/mathornton01/steer-framework" class="btn-outline" target="_blank">View on GitHub</a>
+  </div>
+</div>
 
 ---
 
 ## Overview
 
-The STEER Framework improves the accessibility, usability, and scalability of statistical entropy testing. It implements **76 statistical tests** across four major test batteries, all accessible through both a command-line interface and a modern graphical application.
+Anametric STEER improves the accessibility, usability, and scalability of statistical entropy testing. It implements **76 statistical tests** across four major test batteries, all accessible through both a command-line interface and a modern graphical application.
 
-| Battery | Tests | Origin |
-|---------|------:|--------|
-| **NIST Statistical Test Suite** | 15 | NIST SP 800-22 Rev 1a |
-| **Diehard / Dieharder** | 28 | George Marsaglia, David Bauer, Robert G. Brown |
-| **TestU01 Crush** | 31 | Pierre L'Ecuyer |
-| **Causal Model Tests** | 2 | Pearl and Rubin causal inference models |
+<div class="battery-grid">
+  <div class="battery-card">
+    <h4>NIST STS</h4>
+    <p><span class="count">15</span> tests</p>
+    <p>SP 800-22 Rev 1a — the worldwide standard for RNG certification.</p>
+  </div>
+  <div class="battery-card">
+    <h4>Diehard / Dieharder</h4>
+    <p><span class="count">28</span> tests</p>
+    <p>Marsaglia, Bauer (DAB), and Brown (RGB) battery suites.</p>
+  </div>
+  <div class="battery-card">
+    <h4>TestU01 Crush</h4>
+    <p><span class="count">31</span> tests</p>
+    <p>Pierre L'Ecuyer's stringent test library.</p>
+  </div>
+  <div class="battery-card featured">
+    <h4>Causal Model Tests</h4>
+    <p><span class="count">2</span> tests</p>
+    <p>Pearl &amp; Rubin causal inference — <em>an Anametric innovation.</em></p>
+  </div>
+</div>
+
+<div class="causal-highlight">
+  <h3><span class="badge">Featured</span> Causal Inference Test Battery</h3>
+  <p>
+    Anametric STEER uniquely integrates <strong>causal inference methodology</strong> into entropy evaluation — going beyond correlation to probe whether deviations from randomness arise from genuine structural patterns.
+  </p>
+  <p>
+    <strong>Pearl Causal Model (PCM)</strong> — Uses structural causal modeling to test whether observed bit patterns exhibit directional causal dependencies that a truly random source should not produce.
+  </p>
+  <p>
+    <strong>Rubin Causal Model (RCM)</strong> — Applies the potential-outcomes framework to evaluate whether subpopulations of a bitstream show treatment-effect-like deviations, indicating non-random structure.
+  </p>
+  <p style="margin-top:16px; font-size:0.9rem; color:var(--text-muted);">
+    These tests complement traditional statistical batteries by detecting failure modes that frequency- and pattern-based tests may miss.
+  </p>
+</div>
 
 ---
 
 ## GUI Application
 
-The STEER GUI provides a complete graphical interface for selecting tests, configuring parameters, executing test runs, and reviewing results — all without touching the command line.
+The Anametric STEER GUI provides a complete graphical interface for selecting tests, configuring parameters, executing test runs, and reviewing results — all without touching the command line.
 
 ### Main Window
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot of the main STEER GUI window showing the three-column layout with Available Tests, Planned Analysis, and Results tabs -->
 <p align="center">
   <img src="screenshots/gui-main-window.svg" alt="STEER GUI Main Window" width="900"><br>
-  <em>The main STEER GUI window with test selection, parameter configuration, and results display.</em>
+  <em>The main Anametric STEER GUI window with test selection, parameter configuration, and results display.</em>
 </p>
 
 ### Test Selection and Planning
 
 Browse all 76 tests organized by battery. Select individual tests or entire batteries, configure parameters, and queue them for execution.
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot showing the Available Tests tree expanded with tests selected and added to the Planned Analysis list -->
 <p align="center">
   <img src="screenshots/gui-test-selection.svg" alt="Test Selection" width="900"><br>
-  <em>Selecting tests from the NIST STS, Diehard, and TestU01 batteries.</em>
+  <em>Selecting tests from the NIST STS, Diehard, TestU01, and Causal Model batteries.</em>
 </p>
 
 ### Parameter Configuration
 
 Each test exposes configurable parameters — common settings like bitstream count, length, and significance level, plus test-specific parameters like dimension, block size, or tuple size.
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot showing the parameter editing panel with both common and test-specific parameters visible -->
 <p align="center">
   <img src="screenshots/gui-parameters.svg" alt="Parameter Configuration" width="900"><br>
   <em>Configuring common and test-specific parameters for a planned test.</em>
@@ -71,7 +97,6 @@ Each test exposes configurable parameters — common settings like bitstream cou
 
 Run your test plan with real-time progress tracking. Tests execute sequentially with live output streaming to the log.
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot showing a test run in progress with the progress bar and log output visible -->
 <p align="center">
   <img src="screenshots/gui-running.svg" alt="Test Execution" width="900"><br>
   <em>Test execution in progress with real-time progress tracking.</em>
@@ -81,13 +106,11 @@ Run your test plan with real-time progress tracking. Tests execute sequentially 
 
 View results in a structured summary, drill into detailed hierarchical breakdowns, or examine the raw JSON report with syntax highlighting.
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot showing the Results tab with the Summary sub-tab displaying a PASS result with probability values -->
 <p align="center">
   <img src="screenshots/gui-results-summary.svg" alt="Results Summary" width="900"><br>
   <em>Test results summary showing pass/fail evaluation and probability values.</em>
 </p>
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot showing the Results tab with the Details sub-tab displaying the hierarchical tree of configurations, tests, and criteria -->
 <p align="center">
   <img src="screenshots/gui-results-details.svg" alt="Results Details" width="900"><br>
   <em>Detailed hierarchical view of test configurations, calculations, and criteria.</em>
@@ -97,7 +120,6 @@ View results in a structured summary, drill into detailed hierarchical breakdown
 
 Browse comprehensive documentation for every test directly within the application — including mathematical basis, parameter descriptions, result interpretation, and recommendations.
 
-<!-- SCREENSHOT PLACEHOLDER: Replace with actual screenshot showing the Documentation tab with a test selected in the left sidebar and its full documentation displayed on the right -->
 <p align="center">
   <img src="screenshots/gui-documentation.svg" alt="Documentation Browser" width="900"><br>
   <em>Built-in documentation browser with mathematical details and usage guidance.</em>
@@ -135,12 +157,14 @@ Tests from Pierre L'Ecuyer's TestU01 library, widely regarded as one of the most
 
 Serial Over, Close Pairs, Collision Over, GCD, Linear Complexity, Appearance Spacings, Sum Collector, Savir2, Coupon Collector, Weight Distribution, Close Pairs Bit Match, Simplified Poker, Gap, Collision Permut, Max of T, Run, Permutation, Sample Product, Sample Mean, Sample Correlation, Random Walk, Hamming Weight/Correlation/Independence, String Run, Autocorrelation, Periods in Strings, Longest Head Run, Fourier Spectral, Entropy Discretization, Multinomial Bits Over
 
-### Causal Model Tests (2 tests)
+### Causal Model Tests (2 tests) — <em style="color:var(--accent-gold);">Anametric Innovation</em>
 
-Python-based tests using causal inference methodology:
+Python-based tests applying causal inference methodology to entropy evaluation — a capability unique to Anametric STEER:
 
-- **Pearl Causal Model** — Structural causal model analysis
-- **Rubin Causal Model** — Potential outcomes framework analysis
+- **Pearl Causal Model (PCM)** — Structural causal modeling to detect directional dependencies in bitstreams that violate randomness assumptions
+- **Rubin Causal Model (RCM)** — Potential outcomes framework to identify treatment-effect-like deviations across bitstream subpopulations
+
+These tests detect failure modes that purely statistical batteries may miss, providing deeper insight into RNG quality.
 
 ---
 
@@ -241,22 +265,10 @@ Each C test implements the STEER test shell API with 7 standard callbacks (`GetT
 
 ## Credits
 
-The STEER Framework builds on foundational work by:
+Anametric STEER builds on foundational work by:
 
 - **NIST** — Statistical Test Suite (SP 800-22 Rev 1a)
 - **George Marsaglia** — Diehard Battery of Tests of Randomness
 - **Robert G. Brown** — Dieharder: A Random Number Test Suite (RGB tests)
 - **David Bauer** — Dieharder DAB test extensions
 - **Pierre L'Ecuyer & Richard Simard** — TestU01 statistical testing library
-
-<p align="center">
-  <img src="images/anametric-logo.png" alt="Anametric" height="60">
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="images/ddics-logo.png" alt="Darwin Deason Institute for Cyber Security" height="60">
-</p>
-
-<p align="center">
-  <a href="https://github.com/mathornton01/steer-framework">GitHub</a> &middot;
-  <a href="https://github.com/mathornton01/steer-framework/issues">Issues</a> &middot;
-  MIT License
-</p>

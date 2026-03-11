@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy, QApplication,
 )
 
-from theme import COLORS
+from theme import COLORS, set_mode, current_mode
 from test_registry import TestRegistry, SteerTestInfo
 from test_runner import TestRunner
 from report_viewer import ReportViewer
@@ -201,7 +201,7 @@ class TitleBar(QWidget):
         layout.addSpacing(8)
 
         # Title text
-        self.title_label = QLabel("STEER Framework")
+        self.title_label = QLabel("Anametric STEER")
         self.title_label.setStyleSheet(
             f"color: {COLORS['text_secondary']}; font-size: 9pt; "
             f"font-weight: 500; background: transparent;"
@@ -209,6 +209,20 @@ class TitleBar(QWidget):
         layout.addWidget(self.title_label)
 
         layout.addStretch()
+
+        # Theme toggle button (dark/light)
+        self.theme_btn = QPushButton("☀")
+        self.theme_btn.setToolTip("Switch to light mode")
+        self.theme_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; "
+            f"border-radius: 8px; color: {COLORS['text_secondary']}; font-size: 13pt; "
+            f"padding: 0px; min-width: 36px; min-height: 28px; max-width: 36px; max-height: 28px; }}"
+            f"QPushButton:hover {{ background-color: {COLORS['bg_tertiary']}; }}"
+        )
+        self.theme_btn.clicked.connect(self._toggle_theme)
+        layout.addWidget(self.theme_btn)
+
+        layout.addSpacing(4)
 
         # Window control buttons
         btn_style_base = (
@@ -249,6 +263,21 @@ class TitleBar(QWidget):
             self._window.showNormal()
         else:
             self._window.showMaximized()
+
+    def _toggle_theme(self):
+        new_mode = "light" if current_mode() == "dark" else "dark"
+        set_mode(new_mode)
+        from theme import STYLESHEET
+        QApplication.instance().setStyleSheet(STYLESHEET)
+        # Update the toggle button icon and tooltip
+        if new_mode == "dark":
+            self.theme_btn.setText("\u2600")
+            self.theme_btn.setToolTip("Switch to light mode")
+        else:
+            self.theme_btn.setText("\u263e")
+            self.theme_btn.setToolTip("Switch to dark mode")
+        # Refresh inline styles that reference COLORS
+        self._window.update_inline_styles()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -599,15 +628,15 @@ class MainWindow(QMainWindow):
 
         # Add columns to splitter with size policies
         col1.setMinimumWidth(180)
-        col2.setMinimumWidth(200)
-        col3.setMinimumWidth(300)
+        col2.setMinimumWidth(170)
+        col3.setMinimumWidth(250)
         splitter.addWidget(col1)
         splitter.addWidget(col2)
         splitter.addWidget(col3)
         splitter.setStretchFactor(0, 0)  # col1 doesn't stretch
         splitter.setStretchFactor(1, 0)  # col2 doesn't stretch
         splitter.setStretchFactor(2, 1)  # col3 gets extra space
-        splitter.setSizes([300, 280, 620])
+        splitter.setSizes([300, 240, 560])
 
         outer_layout.addWidget(content, 1)
 
@@ -624,6 +653,53 @@ class MainWindow(QMainWindow):
 
         # Resize grip
         self._resize_grip = ResizeGrip(self)
+
+    def update_inline_styles(self):
+        """Refresh widgets that use inline COLORS references after a theme switch."""
+        # Title bar elements
+        tb = self.title_bar
+        tb.title_label.setStyleSheet(
+            f"color: {COLORS['text_secondary']}; font-size: 9pt; "
+            f"font-weight: 500; background: transparent;"
+        )
+        btn_style_base = (
+            "QPushButton {{ background: transparent; border: none; "
+            "border-radius: 8px; color: {color}; font-size: {size}; "
+            "padding: 0px; min-width: 36px; min-height: 28px; max-width: 36px; max-height: 28px; }}"
+            "QPushButton:hover {{ background-color: {hover_bg}; }}"
+        )
+        tb.theme_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; "
+            f"border-radius: 8px; color: {COLORS['text_secondary']}; font-size: 13pt; "
+            f"padding: 0px; min-width: 36px; min-height: 28px; max-width: 36px; max-height: 28px; }}"
+            f"QPushButton:hover {{ background-color: {COLORS['bg_tertiary']}; }}"
+        )
+        tb.minimize_btn.setStyleSheet(btn_style_base.format(
+            color=COLORS["text_secondary"], size="12pt",
+            hover_bg=COLORS["bg_tertiary"]
+        ))
+        tb.maximize_btn.setStyleSheet(btn_style_base.format(
+            color=COLORS["text_secondary"], size="11pt",
+            hover_bg=COLORS["bg_tertiary"]
+        ))
+        tb.close_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; "
+            f"border-radius: 8px; color: {COLORS['text_secondary']}; font-size: 10pt; "
+            f"padding: 0px; min-width: 36px; min-height: 28px; max-width: 36px; max-height: 28px; }}"
+            f"QPushButton:hover {{ background-color: {COLORS['failure']}; color: white; }}"
+        )
+        # Content area and status bar
+        self.findChild(QWidget, "contentArea").setStyleSheet(
+            f"#contentArea {{ background-color: {COLORS['bg_primary']}; }}"
+        )
+        self.status_label.setStyleSheet(
+            f"color: {COLORS['text_muted']}; padding: 4px 16px; "
+            f"background: {COLORS['bg_secondary']}; "
+            f"border-bottom-left-radius: {CORNER_RADIUS}px; "
+            f"border-bottom-right-radius: {CORNER_RADIUS}px;"
+        )
+        # Force repaint for rounded corner background
+        self.update()
 
     # ── Test Tree Population ──────────────────────────────────────────────────
 

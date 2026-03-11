@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="icon" type="image/png" href="{{ '/images/anametric-logo.png' | relative_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-inner">
+      <a href="{{ '/' | relative_url }}" class="nav-brand">
+        <img src="{{ '/images/anametric-logo.png' | relative_url }}" alt="Anametric" class="nav-logo">
+        <span class="nav-title">Anametric <span class="nav-title-accent">STEER</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="{{ '/' | relative_url }}">Home</a>
+        <a href="{{ '/STEER_User_Guide' | relative_url }}">CLI Guide</a>
+        <a href="{{ '/STEER_GUI_User_Guide' | relative_url }}">GUI Guide</a>
+        <a href="{{ '/STEER_Developer_Guide' | relative_url }}">Developer Guide</a>
+        <a href="https://github.com/mathornton01/steer-framework" target="_blank">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    {{ content }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-logos">
+        <img src="{{ '/images/anametric-logo.png' | relative_url }}" alt="Anametric" height="36">
+        <img src="{{ '/images/ddics-logo.png' | relative_url }}" alt="Darwin Deason Institute for Cyber Security" height="36">
+      </div>
+      <p class="footer-text">Anametric STEER &middot; Statistical Testing of Entropy Evaluation Report</p>
+      <p class="footer-links">
+        <a href="https://github.com/mathornton01/steer-framework">GitHub</a> &middot;
+        <a href="https://github.com/mathornton01/steer-framework/issues">Issues</a> &middot;
+        MIT License
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

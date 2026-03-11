@@ -82,8 +82,8 @@ class ReportViewer(QWidget):
         # Details tab
         self.details_tree = QTreeWidget()
         self.details_tree.setHeaderLabels(["Field", "Value", "Status"])
-        self.details_tree.setColumnWidth(0, 280)
-        self.details_tree.setColumnWidth(1, 300)
+        self.details_tree.setColumnWidth(0, 220)
+        self.details_tree.setColumnWidth(1, 240)
         self.details_tree.setAlternatingRowColors(True)
         self.tabs.addTab(self.details_tree, "Details")
 
