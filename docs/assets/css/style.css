@@ -90,28 +90,31 @@ p { margin: 0 0 16px; }
   text-decoration: none;
 }
 
-.nav-logo {
-  height: 26px;
+.nav-logo-wide {
+  height: 22px;
   width: auto;
   opacity: 0.9;
   transition: opacity 0.2s;
 }
 
-.nav-brand:hover .nav-logo {
+.nav-logo-steer {
+  height: 20px;
+  width: auto;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.nav-divider {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 300;
+  opacity: 0.4;
+  user-select: none;
+}
+
+.nav-brand:hover .nav-logo-wide,
+.nav-brand:hover .nav-logo-steer {
   opacity: 1;
-}
-
-.nav-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.3px;
-}
-
-.nav-title-accent {
-  color: var(--accent-gold);
-  font-weight: 700;
-  letter-spacing: 1.5px;
 }
 
 .nav-links {
@@ -158,10 +161,32 @@ p { margin: 0 0 16px; }
   margin: 36px auto 0;
 }
 
-.hero-logo {
-  height: 48px;
-  margin-bottom: 20px;
+.hero-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.hero-logo-anametric {
+  height: 44px;
+  width: auto;
+  opacity: 0.9;
+}
+
+.hero-logo-steer {
+  height: 38px;
+  width: auto;
   opacity: 0.85;
+}
+
+.hero-logo-divider {
+  color: var(--text-muted);
+  font-size: 18px;
+  font-weight: 300;
+  opacity: 0.3;
+  user-select: none;
 }
 
 .hero h1 {

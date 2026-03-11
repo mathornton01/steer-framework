@@ -4,7 +4,11 @@ title: Anametric STEER
 ---
 
 <div class="hero">
-  <img src="images/anametric-logo.png" alt="Anametric" class="hero-logo">
+  <div class="hero-logos">
+    <img src="images/Ana_color_horiz_V2.svg" alt="Anametric" class="hero-logo-anametric">
+    <span class="hero-logo-divider">×</span>
+    <img src="images/steer-blue-logo.png" alt="STEER" class="hero-logo-steer">
+  </div>
   <h1>Anametric <strong>STEER</strong></h1>
   <p class="subtitle">Statistical Testing of Entropy Evaluation Report</p>
   <p class="subtitle" style="font-size:0.9rem; margin-top:4px; color:var(--text-muted);">
