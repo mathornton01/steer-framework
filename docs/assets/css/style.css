@@ -100,6 +100,7 @@ p { margin: 0 0 16px; }
   opacity: 0.8;
   transition: opacity 0.2s;
   border: none;
+  filter: brightness(0) invert(1);
 }
 
 .nav-logo-steer {
@@ -191,6 +192,7 @@ p { margin: 0 0 16px; }
   opacity: 0.85;
   border: none !important;
   border-radius: 0 !important;
+  filter: brightness(0) invert(1);
 }
 
 .hero-logo-steer {
@@ -729,6 +731,14 @@ blockquote {
   border-radius: 0 !important;
 }
 
+/* Logo images used at top of guide pages etc — no border */
+.page-content img[src*="logo"],
+.page-content img[src*="Logo"],
+.page-content img[src*="Ana_color"] {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
 .page-content em {
   color: var(--text-muted);
   font-size: 12.5px;
@@ -769,15 +779,15 @@ li strong {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 10px;
-  opacity: 0.45;
+  gap: 14px;
+  margin-bottom: 8px;
+  opacity: 0.35;
 }
 
 .footer-logos img {
   border: none !important;
   border-radius: 0 !important;
-  height: 14px;
+  height: 11px;
   width: auto;
 }
 
