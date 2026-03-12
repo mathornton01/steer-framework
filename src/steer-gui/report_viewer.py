@@ -53,9 +53,73 @@ def _eval_badge(evaluation: str) -> tuple[str, str]:
     e = evaluation.lower()
     if e == "pass":
         return "PASS", COLORS["success"]
+    elif e == "pass_warn":
+        return "PASS*", COLORS["warning"]
     elif e == "fail":
         return "FAIL", COLORS["failure"]
     return "INCONCLUSIVE", COLORS["warning"]
+
+
+# Criteria text patterns that indicate sample-size / statistical-power issues
+# rather than actual test failures
+_SAMPLE_SIZE_PATTERNS = [
+    "bitstreams to test",           # "N bitstream tested >= minimum number of M bitstreams to test"
+    "probability uniformity",       # "probability uniformity of 0.000 > 0.000" (can't assess with few samples)
+    "uniformity assessment",        # "as required for probability uniformity assessment"
+]
+
+
+def _is_sample_size_criterion(criterion_text: str) -> bool:
+    """Return True if a failing criterion is about insufficient sample size."""
+    text = criterion_text.lower()
+    return any(pat in text for pat in _SAMPLE_SIZE_PATTERNS)
+
+
+def _nuanced_eval(report: dict) -> str:
+    """Derive a nuanced evaluation from the report hierarchy.
+
+    Returns:
+        "pass"      – all configs and tests pass
+        "pass_warn" – all statistical tests pass, but config-level criteria
+                      fail only due to sample-size / statistical-power issues
+        "fail"      – one or more statistical tests actually failed
+        "inconclusive" – no configurations or missing data
+    """
+    configs = report.get("configurations", [])
+    if not configs:
+        return report.get("evaluation", "inconclusive").lower()
+
+    overall = report.get("evaluation", "").lower()
+    if overall == "pass":
+        return "pass"
+
+    all_tests_pass = True
+    only_sample_size_failures = True
+
+    for config in configs:
+        # Check test-level evaluations
+        for test in config.get("tests", []):
+            if test.get("evaluation", "").lower() != "pass":
+                all_tests_pass = False
+                break
+        if not all_tests_pass:
+            break
+
+        # Check config-level criteria — are failures only sample-size related?
+        if config.get("evaluation", "").lower() == "fail":
+            for crit in config.get("criteria", []):
+                if not crit.get("result", False):
+                    if not _is_sample_size_criterion(crit.get("criterion", "")):
+                        only_sample_size_failures = False
+                        break
+        if not only_sample_size_failures:
+            break
+
+    if all_tests_pass and only_sample_size_failures:
+        return "pass_warn"
+    elif not all_tests_pass:
+        return "fail"
+    return overall
 
 
 class ReportViewer(QWidget):
@@ -141,12 +205,34 @@ class ReportViewer(QWidget):
         """Display a batch summary from multiple test runs."""
         self._clear_summary()
         total = len(results)
-        passed = sum(1 for _, code, _ in results if code == 0)
+
+        # Read actual evaluation from each report JSON (not exit code)
+        all_reports = []
+        evaluations = []  # (test_name, evaluation_str)
+        for test_name, exit_code, report_path in results:
+            evaluation = None
+            if report_path:
+                try:
+                    data = json.loads(Path(report_path).read_text())
+                    all_reports.append((test_name, data))
+                    report = data.get("report", data)
+                    evaluation = _nuanced_eval(report)
+                except Exception:
+                    pass
+            # Fallback: if no report or no evaluation field, use exit code
+            if not evaluation:
+                evaluation = "pass" if exit_code == 0 else "fail"
+            evaluations.append((test_name, evaluation))
+
+        passed = sum(1 for _, e in evaluations if e in ("pass", "pass_warn"))
+        warned = sum(1 for _, e in evaluations if e == "pass_warn")
         failed = total - passed
 
         # Batch badge
-        if failed == 0:
+        if failed == 0 and warned == 0:
             badge_text, badge_color = "ALL PASSED", COLORS["success"]
+        elif failed == 0 and warned > 0:
+            badge_text, badge_color = "ALL PASSED*", COLORS["warning"]
         else:
             badge_text, badge_color = f"{failed} FAILED", COLORS["failure"]
 
@@ -159,16 +245,30 @@ class ReportViewer(QWidget):
         """)
         self.summary_layout.addWidget(badge)
 
-        stats = QLabel(f"{passed} passed  ·  {failed} failed  ·  {total} total")
+        # Warning explanation under badge
+        if warned > 0:
+            warn_note = QLabel(
+                "⚠ PASS* = statistical tests passed but sample size is below "
+                "the recommended minimum. Increase bitstream count for a "
+                "definitive result."
+            )
+            warn_note.setWordWrap(True)
+            warn_note.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            warn_note.setStyleSheet(
+                f"color: {COLORS['warning']}; padding: 4px 12px; font-style: italic;"
+            )
+            self.summary_layout.addWidget(warn_note)
+
+        warn_part = f"  ·  {warned} low-sample" if warned else ""
+        stats = QLabel(f"{passed} passed{warn_part}  ·  {failed} failed  ·  {total} total")
         stats.setAlignment(Qt.AlignmentFlag.AlignCenter)
         stats.setObjectName("statusLabel")
         self.summary_layout.addWidget(stats)
 
         # Per-test results
-        for test_name, exit_code, report_path in results:
+        for test_name, evaluation in evaluations:
             row = QHBoxLayout()
-            status_color = COLORS["success"] if exit_code == 0 else COLORS["failure"]
-            status_text = "PASS" if exit_code == 0 else "FAIL"
+            badge_text, status_color = _eval_badge(evaluation)
 
             dot = QLabel("●")
             dot.setStyleSheet(f"color: {status_color}; font-size: 14pt;")
@@ -179,7 +279,7 @@ class ReportViewer(QWidget):
             name_lbl.setStyleSheet("font-weight: bold;")
             row.addWidget(name_lbl, 1)
 
-            status_lbl = QLabel(status_text)
+            status_lbl = QLabel(badge_text)
             status_lbl.setStyleSheet(
                 f"color: {status_color}; font-weight: bold; padding: 2px 8px;"
             )
@@ -189,13 +289,79 @@ class ReportViewer(QWidget):
             container.setLayout(row)
             self.summary_layout.addWidget(container)
 
+            if evaluation == "pass_warn":
+                reason_lbl = QLabel(
+                    "    Insufficient bitstreams — tests passed statistically "
+                    "but below recommended sample size"
+                )
+                reason_lbl.setWordWrap(True)
+                reason_lbl.setStyleSheet(
+                    f"color: {COLORS['warning']}; font-size: 9pt; "
+                    f"padding: 0px 0px 4px 32px; font-style: italic;"
+                )
+                self.summary_layout.addWidget(reason_lbl)
+
         self.summary_layout.addStretch()
+
+        # Populate Details tree with all reports
+        self.details_tree.clear()
+        for test_name, data in all_reports:
+            report = data.get("report", data)
+            evaluation = _nuanced_eval(report)
+            badge_text, _ = _eval_badge(evaluation)
+            test_root = QTreeWidgetItem([test_name, "", badge_text])
+            self._color_status(test_root, evaluation)
+            self.details_tree.addTopLevelItem(test_root)
+
+            for config in report.get("configurations", []):
+                config_eval = config.get("evaluation", "inconclusive")
+                cb_text, _ = _eval_badge(config_eval)
+                config_item = QTreeWidgetItem([
+                    f"Configuration {config.get('configuration id', '?')}",
+                    "", cb_text
+                ])
+                self._color_status(config_item, config_eval)
+                test_root.addChild(config_item)
+
+                for test in config.get("tests", []):
+                    test_eval = test.get("evaluation", "inconclusive")
+                    t_badge, _ = _eval_badge(test_eval)
+                    test_item = QTreeWidgetItem([
+                        f"Test {test.get('test id', '?')}", "", t_badge
+                    ])
+                    self._color_status(test_item, test_eval)
+                    config_item.addChild(test_item)
+
+                    for calc in test.get("calculations", []):
+                        calc_item = QTreeWidgetItem([
+                            calc.get("name", ""), calc.get("value", ""), ""
+                        ])
+                        test_item.addChild(calc_item)
+
+                    for crit in test.get("criteria", []):
+                        result = crit.get("result", False)
+                        crit_item = QTreeWidgetItem([
+                            crit.get("criterion", ""), "",
+                            "PASS" if result else "FAIL"
+                        ])
+                        self._color_status(crit_item, "pass" if result else "fail")
+                        test_item.addChild(crit_item)
+
+                config_item.setExpanded(True)
+            test_root.setExpanded(True)
+
+        # Populate JSON tab with combined reports
+        if all_reports:
+            combined = [data for _, data in all_reports]
+            self.json_view.setPlainText(json.dumps(
+                combined if len(combined) > 1 else combined[0], indent=4
+            ))
 
     def _build_summary(self, report: dict):
         self._clear_summary()
 
-        # Evaluation badge
-        evaluation = report.get("evaluation", "inconclusive")
+        # Evaluation badge — use nuanced evaluation
+        evaluation = _nuanced_eval(report)
         badge_text, badge_color = _eval_badge(evaluation)
         badge = QLabel(badge_text)
         badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -204,7 +370,24 @@ class ReportViewer(QWidget):
             padding: 20px; background-color: {COLORS['bg_tertiary']};
             border-radius: 8px; border: 2px solid {badge_color};
         """)
+        badge.setToolTip(
+            "Statistical tests passed but insufficient sample size"
+            if evaluation == "pass_warn" else ""
+        )
         self.summary_layout.addWidget(badge)
+
+        # Show warning note for pass_warn
+        if evaluation == "pass_warn":
+            warn_lbl = QLabel(
+                "⚠ Statistical tests passed, but sample size is below the "
+                "recommended minimum. Increase the number of bitstreams for "
+                "a definitive result."
+            )
+            warn_lbl.setWordWrap(True)
+            warn_lbl.setStyleSheet(
+                f"color: {COLORS['warning']}; padding: 4px 8px; font-style: italic;"
+            )
+            self.summary_layout.addWidget(warn_lbl)
 
         # Metadata
         fields = [

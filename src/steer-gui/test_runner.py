@@ -53,7 +53,7 @@ class TestRunner(QObject):
             'test_name': str,
             'program_name': str,
             'executable_path': str,
-            'test_type': str,  # 'nist-sts' or 'python'
+            'test_type': str,  # 'nist-sts', 'diehard', 'testu01', 'ais', or 'python'
             'entropy_file': str,
             'parameters': dict,  # parsed parameter JSON
             'report_level': str,
@@ -130,7 +130,7 @@ class TestRunner(QObject):
                 "-R",
             ]
             process.start("wsl.exe", args)
-        elif self._use_wsl and config["test_type"] == "python":
+        elif self._use_wsl and config["test_type"] in ("python", "ais"):
             # Run Python tests via WSL (they need the wrapper script)
             wsl_exe = windows_to_wsl_path(exe_path)
             wsl_entropy = windows_to_wsl_path(entropy_path)

@@ -1,0 +1,9 @@
+ais disjointness
+ais monobit
+ais poker
+ais runs
+ais long run
+ais autocorrelation
+ais uniform distribution
+ais homogeneity
+ais entropy estimation

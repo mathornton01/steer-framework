@@ -405,22 +405,22 @@
             "nist_reference": "Based on Rubin's Potential Outcomes framework (Rubin, 1974)",
             "program_name": "rubin_causal_model_test",
             "summary": "The Rubin Causal Model test uses propensity score matching and Hamming distance analysis to evaluate randomness by treating bit patterns as treatments in a potential outcomes framework.",
-            "description": "The Rubin Causal Model (RCM) test applies Donald Rubin's potential outcomes (counterfactual) framework to randomness testing. This approach treats subsequences of bits as units in a causal study, where leading bits are 'treatment assignments' and trailing bits are 'outcomes'.\n\nThe test operates as follows:\n1. The binary sequence is converted to an n-ary alphabet by grouping bits.\n2. Subsequences are extracted and organized into a data frame with treatment (leading values) and outcome (trailing values) columns.\n3. Propensity scores are computed using multinomial logistic regression, estimating the probability of each treatment assignment given the covariates.\n4. Units are matched based on propensity scores using nearest-neighbor matching.\n5. For each matched pair, the Hamming distance between their outcomes is computed.\n6. The mean Hamming distance is compared against a null distribution generated from random simulations.\n\nIn a truly random sequence, the treatment assignment should be independent of the outcomes, so matched pairs should show Hamming distances consistent with random chance. If the treatment causally affects the outcomes, the Hamming distances will systematically deviate from the null distribution.\n\nThe multinomial logistic regression uses the LBFGS solver from scikit-learn with a fallback to uniform propensity scores if the model fails to converge (which is expected for truly random data).",
-            "mathematical_basis": "Convert binary to n-ary. Build data frame with treatment T and outcomes Y. Fit multinomial logistic regression P(T=t|X) using LBFGS. Match units via nearest-neighbor on propensity scores. For each matched pair (i,j): H(Y_i, Y_j) = sum(Y_i_k != Y_j_k). Test statistic = mean(H). Generate null distribution via N_sim random simulations. P-value = proportion of null statistics <= observed statistic.",
+            "description": "The Rubin Causal Model (RCM) test applies Donald Rubin's potential outcomes (counterfactual) framework to randomness testing. This approach treats subsequences of bits as units in a causal study, where designated positions are 'treatment assignments', other designated positions are 'outcomes', and the remaining positions serve as 'covariates'.\n\nThe test operates as follows:\n1. The binary sequence is converted to an n-ary alphabet by grouping bits.\n2. Subsequences are extracted and organized into a data frame with treatment, outcome, and covariate columns.\n3. Covariate positions (those not assigned to treatment or outcome) are one-hot encoded and used to compute propensity scores via multinomial logistic regression.\n4. Each treatment unit is matched to the control unit (most common treatment class) with the closest propensity score.\n5. For each matched pair, the Hamming distance between their outcome positions is computed.\n6. The average mismatch proportion is compared against the analytical null expectation p0 = 1 - 1/k using a z-test.\n\nIn a truly random sequence, the treatment assignment should be independent of the outcomes, so matched pairs should show Hamming distances consistent with random chance (expected mismatch rate of 1 - 1/k for a k-ary alphabet). If the treatment causally affects the outcomes, the mismatch proportion will systematically deviate.\n\nThe multinomial logistic regression uses the LBFGS solver from scikit-learn with a fallback to uniform propensity scores if the model fails to converge (which is expected for truly random data).",
+            "mathematical_basis": "Convert binary to n-ary. Build data frame with treatment T, outcomes Y, and covariates X (positions not assigned to T or Y). Fit multinomial logistic regression P(T=t|X) using LBFGS. Match each treatment unit to nearest control by propensity score. For each matched pair (i,j): H(Y_i, Y_j) = sum(Y_i_k != Y_j_k). Test statistic = mean mismatch proportion = avg(H) / m. Null expectation p0 = 1 - 1/k for k-ary alphabet. SE = sqrt(p0*(1-p0)/(m*n)). Z = (prop - p0) / SE. Two-tailed p-value from normal CDF.",
             "parameters": {
                 "bitstream_count": "Number of independent bitstreams to test (default: 1)",
                 "bitstream_length": "Length of each bitstream in bits (recommended minimum: 10000 bits)",
                 "alpha": "Significance level for the test (default: 0.01)",
                 "alphabet_size": "Base for n-ary conversion (default: 3 for ternary)",
                 "subsequence_size": "Length of subsequences to analyze (default: 6)",
-                "treatment_length": "Number of leading values used as treatment (default: 2)",
-                "null_simulations": "Number of random simulations for null distribution (default: 200)"
+                "treatment_positions": "Indices within subsequence used as treatment (default: [0, 1])",
+                "outcome_positions": "Indices within subsequence used as outcome (default: [2, 3, 4, 5])"
             },
             "interpretation": {
                 "pass": "Matched pairs show Hamming distances consistent with the null distribution, indicating no causal relationship between treatments and outcomes (consistent with randomness).",
                 "fail": "Matched pairs show systematically different Hamming distances than expected under randomness, suggesting that certain bit patterns influence subsequent patterns."
             },
-            "recommendations": "This test requires scikit-learn, scipy, pandas, and numpy. Minimum 10,000 bits recommended. The logistic regression may not converge for truly random data (this is expected and handled gracefully). Increasing null simulations improves P-value precision.",
+            "recommendations": "This test requires scikit-learn, scipy, pandas, and numpy. Minimum 10,000 bits recommended. The logistic regression may not converge for truly random data (this is expected and handled gracefully). Covariate positions (those not assigned to treatment or outcome) are critical — ensure your block size is large enough to provide meaningful covariates for propensity score matching.",
             "example_applications": [
                 "Counterfactual analysis of random number generators",
                 "Testing for hidden dependencies using propensity score methods",
@@ -1813,6 +1813,226 @@
                 "Fundamental uniformity validation of random number generators",
                 "Meta-testing p-value distributions from other statistical tests",
                 "Non-parametric distribution testing without binning artifacts"
+            ]
+        },
+        "ais_disjointness": {
+            "name": "AIS 20/31 Disjointness Test (T0)",
+            "category": "AIS 20/31 (Procedure A)",
+            "nist_reference": "BSI AIS 20/31, Test T0",
+            "program_name": "ais_disjointness_test",
+            "summary": "Verifies that consecutive non-overlapping 48-bit words extracted from a 20,000-bit sample are all distinct.",
+            "description": "The Disjointness Test (T0) is the first test in the AIS 20/31 Procedure A suite. It extracts consecutive non-overlapping 48-bit words from a 20,000-bit sample and verifies that no two adjacent words are identical. This is a continuous output test designed to detect catastrophic failures in a random number generator where the output becomes stuck or repeats.\n\nWith 48-bit words, the probability of any two random words being identical is 2^{-48}, making coincidental duplicates astronomically unlikely. A failure indicates a serious defect in the generator.",
+            "mathematical_basis": "Extract floor(20000/48) consecutive non-overlapping 48-bit words W_1, W_2, ..., W_k from the sample. The test passes if and only if W_i != W_{i+1} for all i = 1, ..., k-1.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "All consecutive 48-bit words are distinct, indicating no generator stalling.",
+                "fail": "Two consecutive 48-bit words are identical, indicating a critical generator defect."
+            },
+            "recommendations": "This is a basic health check. Failure indicates a catastrophic RNG defect and should trigger immediate investigation. Included in AIS 20/31 Procedure A (online/startup testing).",
+            "example_applications": [
+                "TRNG startup testing per BSI AIS 20/31",
+                "Continuous health monitoring of hardware RNGs",
+                "FIPS 140-3 continuous random number generator testing"
+            ]
+        },
+        "ais_monobit": {
+            "name": "AIS 20/31 Monobit Test (T1)",
+            "category": "AIS 20/31 (Procedure A)",
+            "nist_reference": "BSI AIS 20/31, Test T1",
+            "program_name": "ais_monobit_test",
+            "summary": "Counts the number of ones in a 20,000-bit sample; the count must lie within [9654, 10346].",
+            "description": "The AIS 20/31 Monobit Test (T1) is a fixed-threshold variant of the NIST monobit test. Rather than computing a p-value from a normal distribution, AIS 31 specifies hard bounds: in exactly 20,000 bits the number of ones must be between 9,654 and 10,346 inclusive.\n\nThese bounds correspond approximately to a 0.01 significance level for a two-sided test of the null hypothesis that each bit is independently and uniformly distributed. The test detects gross bias in the generator output.",
+            "mathematical_basis": "Let X = number of ones in a 20,000-bit sample. The test passes if and only if 9654 <= X <= 10346. Under the null hypothesis of i.i.d. Bernoulli(0.5) bits, X ~ Binomial(20000, 0.5) with mean 10000 and standard deviation ~70.71.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "The proportion of 1s is approximately 0.5, consistent with an unbiased generator.",
+                "fail": "Significant bias detected — too many or too few 1s."
+            },
+            "recommendations": "This test uses a fixed 20,000-bit sample size as specified by AIS 20/31. It is part of Procedure A (online testing) and should be run before longer statistical tests.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure A compliance testing",
+                "Quick bias detection in TRNG output",
+                "Hardware RNG startup validation"
+            ]
+        },
+        "ais_poker": {
+            "name": "AIS 20/31 Poker Test (T2)",
+            "category": "AIS 20/31 (Procedure A)",
+            "nist_reference": "BSI AIS 20/31, Test T2",
+            "program_name": "ais_poker_test",
+            "summary": "Divides 20,000 bits into 5,000 4-bit nibbles and tests whether the frequency distribution of nibble values is uniform via a chi-squared statistic bounded in [1.03, 57.4].",
+            "description": "The AIS 20/31 Poker Test (T2) partitions a 20,000-bit sample into 5,000 consecutive 4-bit nibbles (values 0–15). It counts the frequency of each of the 16 possible nibble values and computes a chi-squared statistic.\n\nThe chi-squared statistic X = (16/5000) * sum(f_i^2) - 5000 must lie within the interval [1.03, 57.4]. The lower bound rejects sequences that are too uniform (suspiciously perfect), while the upper bound rejects sequences with too much variation from uniformity.\n\nThis is equivalent to a frequency test on 4-bit symbols rather than individual bits, detecting higher-order patterns that monobit testing would miss.",
+            "mathematical_basis": "Let f_i = frequency of nibble value i (i = 0..15) among 5000 nibbles extracted from 20,000 bits. X = (16/5000) * sum_{i=0}^{15} f_i^2 - 5000. The test passes if 1.03 <= X <= 57.4.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "The distribution of 4-bit nibbles is consistent with uniformity.",
+                "fail": "Nibble frequencies deviate significantly from uniformity, indicating non-random patterns at the 4-bit level."
+            },
+            "recommendations": "Fixed 20,000-bit sample size as specified by AIS 20/31. Complements T1 (monobit) by detecting dependencies between consecutive bits within 4-bit groups.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure A compliance",
+                "Detecting byte-level patterns in RNG output",
+                "Testing uniformity at multiple granularities"
+            ]
+        },
+        "ais_runs": {
+            "name": "AIS 20/31 Runs Test (T3)",
+            "category": "AIS 20/31 (Procedure A)",
+            "nist_reference": "BSI AIS 20/31, Test T3",
+            "program_name": "ais_runs_test",
+            "summary": "Counts runs of consecutive identical bits in 20,000 bits by length (1–5, 6+) and bit value; all 12 category counts must fall within specified bounds.",
+            "description": "The AIS 20/31 Runs Test (T3) counts the number of maximal runs (uninterrupted sequences of identical bits) in a 20,000-bit sample, categorized by run length and bit value.\n\nRuns are classified into 6 length categories (1, 2, 3, 4, 5, 6+) for each bit value (0 and 1), yielding 12 category counts. Each count must fall within fixed bounds:\n- Length 1: [2267, 2733]\n- Length 2: [1079, 1421]\n- Length 3: [502, 748]\n- Length 4: [223, 402]\n- Length 5: [90, 223]\n- Length 6+: [90, 223]\n\nThese bounds apply identically to both 0-runs and 1-runs. The test detects deviations in the run-length distribution that would suggest non-random temporal structure.",
+            "mathematical_basis": "Parse the 20,000-bit sample into maximal runs. For bit value b in {0,1} and length category L in {1,2,3,4,5,6+}, let C(b,L) = count of runs. The test passes if all 12 values C(b,L) fall within their respective bound intervals.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "Run counts at all lengths and both bit values are within expected bounds.",
+                "fail": "One or more run-length categories have counts outside the expected range."
+            },
+            "recommendations": "Part of AIS 20/31 Procedure A. A failure in this test may indicate autocorrelation or periodic structure in the generator output.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure A compliance",
+                "Detecting serial dependencies in random bit sequences",
+                "Identifying generators that produce too-long or too-short runs"
+            ]
+        },
+        "ais_long_run": {
+            "name": "AIS 20/31 Long Run Test (T4)",
+            "category": "AIS 20/31 (Procedure A)",
+            "nist_reference": "BSI AIS 20/31, Test T4",
+            "program_name": "ais_long_run_test",
+            "summary": "Scans a 20,000-bit sample for runs of identical bits of length 34 or more; any such run causes failure.",
+            "description": "The AIS 20/31 Long Run Test (T4) searches a 20,000-bit sample for any maximal run of identical bits (either all 0s or all 1s) of length 34 or greater. The test passes if no such long run exists.\n\nIn a truly random sequence of 20,000 bits, the expected longest run is approximately 14 bits (log2(20000) ≈ 14.3). A run of 34 or more bits is astronomically unlikely under the null hypothesis (probability < 2^{-20}), making this test very specific — it only triggers on genuine generator failures.\n\nThis test is designed to detect stuck-at faults or catastrophic failures where the generator output becomes constant or nearly constant for extended periods.",
+            "mathematical_basis": "Let R_max = length of the longest maximal run of identical bits in the 20,000-bit sample. The test passes if R_max <= 33.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "No excessively long runs detected; generator output has normal variation.",
+                "fail": "A run of 34+ identical bits detected, indicating a likely generator malfunction."
+            },
+            "recommendations": "This is a fail-safe test. A failure should be treated as a critical alert requiring immediate investigation of the RNG hardware or software.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure A compliance",
+                "Detecting stuck-at faults in hardware RNGs",
+                "Emergency halt criteria for cryptographic key generation"
+            ]
+        },
+        "ais_autocorrelation": {
+            "name": "AIS 20/31 Autocorrelation Test (T5)",
+            "category": "AIS 20/31 (Procedure A)",
+            "nist_reference": "BSI AIS 20/31, Test T5",
+            "program_name": "ais_autocorrelation_test",
+            "summary": "For each shift tau from 1 to 5000, computes Z(tau) = number of XOR differences between bit[i] and bit[i+tau] for i=0..4999; each Z(tau) must lie within [2326, 2674].",
+            "description": "The AIS 20/31 Autocorrelation Test (T5) measures the statistical independence of bits at various offsets. For each shift value tau from 1 to 5000, it computes Z(tau) = sum of bit[i] XOR bit[i+tau] for i = 0 to 4999, using the first 10,000 bits of the 20,000-bit sample.\n\nEach Z(tau) must fall within [2326, 2674]. Under the null hypothesis of i.i.d. uniform bits, Z(tau) follows a Binomial(5000, 0.5) distribution with mean 2500 and standard deviation ~35.36. The bounds [2326, 2674] correspond approximately to a 4.9-sigma interval.\n\nThis test is the most sensitive of the Procedure A tests, capable of detecting linear feedback shift register (LFSR) patterns, periodic structures, and other forms of autocorrelation that simpler tests would miss.",
+            "mathematical_basis": "For tau = 1, 2, ..., 5000: Z(tau) = sum_{i=0}^{4999} (bit[i] XOR bit[i+tau]). The test passes if 2326 <= Z(tau) <= 2674 for all tau. Under H0, E[Z(tau)] = 2500 and Var[Z(tau)] = 1250.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "No significant autocorrelation detected at any shift from 1 to 5000.",
+                "fail": "Autocorrelation detected at one or more shifts, indicating non-independence of bits."
+            },
+            "recommendations": "This test requires at least 15,000 bits (10,000 data bits + 5,000 shift range). It is the most computationally intensive Procedure A test. Failure may indicate LFSR-based generators or physical feedback in hardware RNGs.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure A compliance",
+                "Detecting LFSR and feedback-based generator weaknesses",
+                "Verifying bit-level independence in TRNG output"
+            ]
+        },
+        "ais_uniform_distribution": {
+            "name": "AIS 20/31 Uniform Distribution Test (T6)",
+            "category": "AIS 20/31 (Procedure B)",
+            "nist_reference": "BSI AIS 20/31, Test T6",
+            "program_name": "ais_uniform_distribution_test",
+            "summary": "Applies tests T1–T5 to multiple consecutive 20,000-bit segments; all segments must pass all sub-tests.",
+            "description": "The Uniform Distribution Test (T6) is part of AIS 20/31 Procedure B (statistical testing for type approval). It extends Procedure A by applying tests T1 through T5 to multiple consecutive 20,000-bit segments extracted from a longer bitstream.\n\nThe test passes only if every segment passes every sub-test (T1 monobit, T2 poker, T3 runs, T4 long run, T5 autocorrelation). This multi-sample approach verifies that the generator maintains its statistical properties consistently across its output, detecting degradation or non-stationarity.\n\nThe default configuration uses 10 segments (200,000 bits minimum), but this can be increased for more thorough testing.",
+            "mathematical_basis": "Partition the bitstream into Q non-overlapping segments of 20,000 bits each. For each segment s (s = 1..Q), apply T1-T5. The overall test passes if and only if all Q*5 individual sub-tests pass.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 20,000)",
+                "number_of_segments": "Number of 20,000-bit segments to test (default: 10, minimum: 2)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "All segments pass all sub-tests, indicating consistent statistical quality.",
+                "fail": "One or more segments failed one or more sub-tests, indicating non-stationary behavior."
+            },
+            "recommendations": "Use at least 10 segments for meaningful results. More segments provide greater confidence but require proportionally more data. This test is part of the BSI type approval process for TRNGs.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure B type approval",
+                "Long-term stability assessment of TRNGs",
+                "Detecting non-stationarity in random number generator output"
+            ]
+        },
+        "ais_homogeneity": {
+            "name": "AIS 20/31 Homogeneity Test (T7)",
+            "category": "AIS 20/31 (Procedure B)",
+            "nist_reference": "BSI AIS 20/31, Test T7",
+            "program_name": "ais_homogeneity_test",
+            "summary": "Applies a chi-squared homogeneity test across multiple 20,000-bit segments to verify all segments have statistically identical proportions of ones.",
+            "description": "The Homogeneity Test (T7) is part of AIS 20/31 Procedure B. It splits the bitstream into Q non-overlapping segments of 20,000 bits and applies a chi-squared test of homogeneity to determine whether all segments come from the same underlying distribution.\n\nUnlike T6 which applies individual tests to each segment, T7 performs a direct statistical comparison across segments. It computes the pooled proportion of ones across all segments, then calculates a chi-squared statistic measuring how much individual segment proportions deviate from the pooled estimate.\n\nThe chi-squared statistic with Q-1 degrees of freedom is converted to a p-value. The test passes if the p-value exceeds the significance level (alpha = 0.01), meaning there is no evidence that segments differ from each other.",
+            "mathematical_basis": "For Q segments of n=20,000 bits each, let X_s = ones count in segment s and p_hat = sum(X_s)/(Q*n). Chi-squared = sum_s [(X_s - n*p_hat)^2/(n*p_hat) + ((n-X_s) - n*(1-p_hat))^2/(n*(1-p_hat))]. P-value = 1 - chi2_cdf(chi_sq, Q-1). Pass if p-value >= alpha.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 40,000)",
+                "number_of_segments": "Number of 20,000-bit segments (default: 10, minimum: 2)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "Segment proportions are statistically homogeneous — no evidence that different parts of the output have different bias.",
+                "fail": "Statistically significant variation detected across segments, indicating non-stationary generator behavior."
+            },
+            "recommendations": "Requires at least 2 segments (40,000 bits). More segments increase the power to detect non-stationarity. Use alongside T6 for comprehensive Procedure B evaluation.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure B type approval",
+                "Detecting drift or aging effects in hardware RNGs",
+                "Verifying environmental stability of TRNG output"
+            ]
+        },
+        "ais_entropy_estimation": {
+            "name": "AIS 20/31 Entropy Estimation Test (T8)",
+            "category": "AIS 20/31 (Procedure B)",
+            "nist_reference": "BSI AIS 20/31, Test T8",
+            "program_name": "ais_entropy_estimation_test",
+            "summary": "Estimates per-bit entropy using Coron's method by counting distinct L-bit patterns; the estimated entropy must meet the PTG.2 threshold (default 0.997 bits/bit).",
+            "description": "The Entropy Estimation Test (T8) is part of AIS 20/31 Procedure B. It implements Coron's entropy estimation method, which counts the number of distinct overlapping L-bit patterns observed in a bitstream.\n\nThe method uses a burn-in phase of Q = 10 * 2^L patterns to populate the pattern dictionary, then counts distinct patterns in the remaining stream. For a truly random sequence with L=8, all 256 possible patterns should be observed quickly, yielding a per-bit entropy estimate close to 1.0.\n\nThe entropy estimator computes log2(distinct_patterns) / L, which for an ideal source equals log2(2^L) / L = 1.0. The test passes if this estimate exceeds the PTG.2 threshold of 0.997 bits per bit. This high threshold ensures the generator has close to full entropy.\n\nReference: Coron, J.-S., 'On the Security of Random Sources', PKC 1999, LNCS 1560, pp. 29–42.",
+            "mathematical_basis": "Let K = number of distinct overlapping L-bit patterns observed (after Q = 10 * 2^L burn-in patterns). Entropy estimate H = log2(K) / L. For PTG.2 compliance: H >= 0.997. With L=8 and sufficient data, K = 256 yields H = 8/8 = 1.0.",
+            "parameters": {
+                "bitstream_count": "Number of independent bitstreams to test (default: 1)",
+                "bitstream_length": "Length of each bitstream in bits (default: 1,000,000; minimum: 10,000)",
+                "pattern_length": "Pattern length L in bits (default: 8, range: 2–16)",
+                "entropy_threshold": "Minimum required entropy per bit (default: 0.997)",
+                "alpha": "Significance level (default: 0.01)"
+            },
+            "interpretation": {
+                "pass": "Estimated per-bit entropy meets or exceeds the threshold, indicating high-quality entropy source.",
+                "fail": "Entropy estimate is below the threshold, indicating insufficient randomness in the source."
+            },
+            "recommendations": "Use L=8 (default) for standard evaluation. Larger L values (e.g., 12 or 16) test for longer-range dependencies but require exponentially more data. The 0.997 threshold is mandated by BSI PTG.2 for physical TRNGs.",
+            "example_applications": [
+                "BSI AIS 20/31 Procedure B type approval",
+                "PTG.2 compliance for physical random number generators",
+                "Entropy quality assessment for cryptographic key generation"
             ]
         }
     }

@@ -23,12 +23,16 @@ title: Anametric STEER
 
 <div class="stats-bar">
   <div class="stat-item">
-    <span class="stat-number">76</span>
+    <span class="stat-number">85</span>
     <span class="stat-label">Statistical Tests</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">4</span>
+    <span class="stat-number">5</span>
     <span class="stat-label">Test Batteries</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">9</span>
+    <span class="stat-label">AIS 20/31 Tests</span>
   </div>
   <div class="stat-item">
     <span class="stat-number">2</span>
@@ -37,14 +41,6 @@ title: Anametric STEER
   <div class="stat-item">
     <span class="stat-number">3</span>
     <span class="stat-label">Platforms</span>
-  </div>
-</div>
-
-<div class="video-placeholder">
-  <div class="video-placeholder-inner">
-    <div class="video-play-icon">&#9654;</div>
-    <p class="video-placeholder-title">Demo Video</p>
-    <p class="video-placeholder-sub">Coming soon — a walkthrough of the Anametric STEER GUI and test workflow.</p>
   </div>
 </div>
 
@@ -65,6 +61,11 @@ title: Anametric STEER
     <h4>TestU01</h4>
     <p><span class="count">31</span> tests</p>
     <p>L'Ecuyer's stringent test library.</p>
+  </div>
+  <div class="battery-card">
+    <h4>AIS 20/31</h4>
+    <p><span class="count">9</span> tests</p>
+    <p>BSI Procedure A &amp; B — German federal entropy certification.</p>
   </div>
   <div class="battery-card featured">
     <h4>Causal Models</h4>
@@ -99,47 +100,82 @@ title: Anametric STEER
   <div class="carousel-viewport">
     <div class="carousel-track">
       <div class="carousel-slide">
-        <img src="screenshots/gui-main-window.svg" alt="STEER GUI Main Window">
+        <img src="screenshots/gui-screenshot-01.png" alt="STEER GUI">
       </div>
       <div class="carousel-slide">
-        <img src="screenshots/gui-test-selection.svg" alt="Test Selection">
+        <img src="screenshots/gui-screenshot-02.png" alt="STEER GUI">
       </div>
       <div class="carousel-slide">
-        <img src="screenshots/gui-parameters.svg" alt="Parameter Configuration">
+        <img src="screenshots/gui-screenshot-03.png" alt="STEER GUI">
       </div>
       <div class="carousel-slide">
-        <img src="screenshots/gui-running.svg" alt="Test Execution">
+        <img src="screenshots/gui-screenshot-04.png" alt="STEER GUI">
       </div>
       <div class="carousel-slide">
-        <img src="screenshots/gui-results-summary.svg" alt="Results Summary">
+        <img src="screenshots/gui-screenshot-05.png" alt="STEER GUI">
       </div>
       <div class="carousel-slide">
-        <img src="screenshots/gui-results-details.svg" alt="Results Details">
+        <img src="screenshots/gui-screenshot-06.png" alt="STEER GUI">
       </div>
       <div class="carousel-slide">
-        <img src="screenshots/gui-documentation.svg" alt="Documentation Browser">
+        <img src="screenshots/gui-screenshot-07.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-08.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-09.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-10.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-11.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-12.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-13.png" alt="STEER GUI">
+      </div>
+      <div class="carousel-slide">
+        <img src="screenshots/gui-screenshot-14.png" alt="STEER GUI">
       </div>
     </div>
   </div>
   <button class="carousel-arrow next" aria-label="Next">&rsaquo;</button>
 
   <!-- Reflection layers (one per slide, toggled by JS) -->
-  <div class="carousel-reflection"><img src="screenshots/gui-main-window.svg" alt=""></div>
-  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-test-selection.svg" alt=""></div>
-  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-parameters.svg" alt=""></div>
-  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-running.svg" alt=""></div>
-  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-results-summary.svg" alt=""></div>
-  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-results-details.svg" alt=""></div>
-  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-documentation.svg" alt=""></div>
+  <div class="carousel-reflection"><img src="screenshots/gui-screenshot-01.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-02.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-03.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-04.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-05.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-06.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-07.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-08.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-09.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-10.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-11.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-12.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-13.png" alt=""></div>
+  <div class="carousel-reflection" style="display:none"><img src="screenshots/gui-screenshot-14.png" alt=""></div>
 
   <!-- Captions (one per slide, toggled by JS) -->
   <div class="carousel-caption"><h4>Main Window</h4><p>Three-panel layout with test browser, parameters, and results.</p></div>
-  <div class="carousel-caption" style="display:none"><h4>Test Selection</h4><p>Browse all 76 tests across NIST STS, Diehard, TestU01, and Causal batteries.</p></div>
-  <div class="carousel-caption" style="display:none"><h4>Parameter Configuration</h4><p>Common settings and test-specific parameters like block size, dimensions, and significance level.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Test Browser</h4><p>Browse 85 tests across NIST STS, Diehard, TestU01, AIS 20/31, and Causal batteries.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Dark Theme</h4><p>Professional dark interface with nine customizable color themes.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Parameter Configuration</h4><p>Common settings and test-specific parameters like block size and significance level.</p></div>
   <div class="carousel-caption" style="display:none"><h4>Test Execution</h4><p>Real-time progress tracking with live output streaming.</p></div>
   <div class="carousel-caption" style="display:none"><h4>Results Summary</h4><p>Pass/fail evaluation with probability values at a glance.</p></div>
   <div class="carousel-caption" style="display:none"><h4>Results Details</h4><p>Hierarchical breakdown of configurations, calculations, and evaluation criteria.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Nord Theme</h4><p>Arctic-inspired color palette — one of nine built-in themes.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Ocean Theme</h4><p>Deep navy blue interface with sky-blue accents.</p></div>
   <div class="carousel-caption" style="display:none"><h4>Documentation Browser</h4><p>Mathematical basis, parameter descriptions, and usage guidance for every test.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Solarized Theme</h4><p>Teal-based color scheme inspired by Ethan Schoonover's Solarized palette.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>AIS 20/31 Tests</h4><p>BSI Procedure A and B — nine entropy evaluation tests for certification.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Causal Models</h4><p>Pearl and Rubin causal inference tests — an Anametric innovation.</p></div>
+  <div class="carousel-caption" style="display:none"><h4>Theme Selection</h4><p>Choose from nine color themes including Dark, Light, Nord, Ocean, and more.</p></div>
 
   <div class="carousel-dots">
     <button class="carousel-dot active" aria-label="Slide 1"></button>
@@ -149,6 +185,13 @@ title: Anametric STEER
     <button class="carousel-dot" aria-label="Slide 5"></button>
     <button class="carousel-dot" aria-label="Slide 6"></button>
     <button class="carousel-dot" aria-label="Slide 7"></button>
+    <button class="carousel-dot" aria-label="Slide 8"></button>
+    <button class="carousel-dot" aria-label="Slide 9"></button>
+    <button class="carousel-dot" aria-label="Slide 10"></button>
+    <button class="carousel-dot" aria-label="Slide 11"></button>
+    <button class="carousel-dot" aria-label="Slide 12"></button>
+    <button class="carousel-dot" aria-label="Slide 13"></button>
+    <button class="carousel-dot" aria-label="Slide 14"></button>
   </div>
 </div>
 
@@ -167,8 +210,8 @@ title: Anametric STEER
   <div class="feature-item">
     <span class="feature-icon">&#9733;</span>
     <div>
-      <h4>76 Tests, 4 Batteries</h4>
-      <p>NIST STS, Diehard/Dieharder, TestU01 Crush, and causal inference models.</p>
+      <h4>85 Tests, 5 Batteries</h4>
+      <p>NIST STS, Diehard/Dieharder, TestU01 Crush, AIS 20/31, and causal inference models.</p>
     </div>
   </div>
   <div class="feature-item">
@@ -219,6 +262,13 @@ Serial Over, Close Pairs, Collision Over, GCD, Linear Complexity, Appearance Spa
 
 - **Pearl Causal Model (PCM)** — Structural causal modeling to detect directional dependencies
 - **Rubin Causal Model (RCM)** — Potential outcomes framework to identify treatment-effect-like deviations
+
+### AIS 20/31 Tests (9 tests)
+
+BSI (German Federal Office for Information Security) Procedure A and Procedure B:
+
+- **Procedure A:** Disjointness (T0), Monobit (T1), Poker (T2), Runs (T3), Long Run (T4), Autocorrelation (T5)
+- **Procedure B:** Uniform Distribution (T6), Homogeneity (T7), Entropy Estimation (T8)
 
 ---
 
@@ -304,6 +354,7 @@ steer-framework/
 Anametric STEER builds on foundational work by:
 
 - **NIST** — Statistical Test Suite (SP 800-22 Rev 1a)
+- **BSI** — AIS 20/31 entropy source evaluation methodology
 - **George Marsaglia** — Diehard Battery of Tests of Randomness
 - **Robert G. Brown** — Dieharder: A Random Number Test Suite (RGB tests)
 - **David Bauer** — Dieharder DAB test extensions

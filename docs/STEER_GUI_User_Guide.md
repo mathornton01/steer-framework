@@ -26,11 +26,12 @@
 
 ### Introduction
 
-The STEER GUI provides a graphical interface for running statistical tests on entropy sources using the STEER (STandard Entropy Evaluation Report) Framework. It supports four test batteries:
+The STEER GUI provides a graphical interface for running statistical tests on entropy sources using the STEER (STandard Entropy Evaluation Report) Framework. It supports five test batteries:
 
 - **NIST Statistical Test Suite (STS)** - 15 tests from the NIST SP 800-22 standard
 - **Diehard / Dieharder Battery** - 28 tests (Marsaglia originals, DAB, and RGB extensions)
 - **TestU01 Crush Battery** - 31 tests from Pierre L'Ecuyer's TestU01 library
+- **AIS 20/31** - 9 BSI entropy certification tests (Procedure A and Procedure B)
 - **Anametric Causal Model Tests** - 2 Python-based causal inference tests (Pearl and Rubin models)
 
 The GUI allows you to select tests, configure parameters, execute test runs, view detailed results, and browse comprehensive documentation for every test — all from a single interface.
@@ -210,6 +211,33 @@ Some tests expose additional parameters below the common ones. These appear auto
 - **Random Walk** — "Walk Length" (default 1000)
 
 Changes to parameters take effect immediately — the plan item label updates to reflect the new values.
+
+#### Causal Model Bit Position Configuration
+
+When a **Pearl Causal Model** or **Rubin Causal Model** test is selected in the plan, a **"Configure Bit Positions…"** button appears below the common parameters. Clicking it opens a pop-out dialog where you assign each bit position within a block to one of three roles:
+
+| Role | Color | Purpose |
+|------|-------|---------|
+| **Treatment** | Cyan | Defines the treatment variable — blocks are grouped by treatment tuple |
+| **Outcome** | Green | The measured outcome positions compared across groups |
+| **Covariate** | Orange | Used only by Rubin for propensity score matching; ignored by Pearl |
+
+Click any cell to cycle its role: **Treatment → Outcome → Covariate**.
+
+The dialog also exposes model-specific parameters:
+
+| Parameter | Models | Default | Description |
+|-----------|--------|---------|-------------|
+| **Block size** | Both | 6 | Subsequence length — the number of bit positions per block |
+| **Alphabet size (k)** | Both | 3 | Number of discrete symbol levels (binary = 2, ternary = 3, etc.) |
+| **State bits** | Pearl only | 2 | Sliding window length for the state-transition graph |
+| **Null simulations** | Pearl only | 200 | Monte Carlo iterations for the empirical null distribution |
+
+**Pearl methodology:** Groups blocks by treatment tuple, normalizes outcomes by treatment anchor via modular arithmetic, builds state-transition graphs per group, and computes pairwise Jaccard similarity. An empirical null distribution is simulated to derive the p-value.
+
+**Rubin methodology:** Uses covariate positions for propensity score matching via multinomial logistic regression. Matched treatment-control pairs are compared by Hamming distance on outcome positions. The test statistic is the average mismatch proportion versus the null expectation $(1 - 1/k)$.
+
+The plan label updates to show the assigned positions, e.g., `T=[0,1] O=[2,3,4,5]`.
 
 #### Applying Parameters to All Tests
 

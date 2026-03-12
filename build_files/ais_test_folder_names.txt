@@ -1,0 +1,9 @@
+AISDisjointness
+AISMonobit
+AISPoker
+AISRuns
+AISLongRun
+AISAutocorrelation
+AISUniformDistribution
+AISHomogeneity
+AISEntropyEstimation

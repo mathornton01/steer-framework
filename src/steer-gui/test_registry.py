@@ -11,7 +11,7 @@ from pathlib import Path
 class SteerTestInfo:
     display_name: str
     program_name: str
-    test_type: str  # "nist-sts", "diehard", "testu01", or "python"
+    test_type: str  # "nist-sts", "diehard", "testu01", "ais", or "python"
     executable_path: str = ""
     is_available: bool = False
     parameter_templates: dict = field(default_factory=dict)
@@ -108,6 +108,23 @@ class TestRegistry:
                 parameter_templates=templates,
             ))
 
+        # AIS 20/31 tests
+        ais_names = self._read_names_file("ais_test_names.txt")
+        for name in ais_names:
+            dash_name = name.replace(" ", "-")
+            underscore_name = name.replace(" ", "_")
+            program_name = f"{underscore_name}_test"
+            exe_path = self._find_executable(program_name)
+            templates = self._find_parameter_templates(dash_name)
+            self.tests.append(SteerTestInfo(
+                display_name=name.title(),
+                program_name=program_name,
+                test_type="ais",
+                executable_path=exe_path,
+                is_available=bool(exe_path),
+                parameter_templates=templates,
+            ))
+
         # Python tests
         py_names = self._read_names_file("python_test_names.txt")
         for name in py_names:
@@ -142,6 +159,9 @@ class TestRegistry:
 
     def testu01_tests(self) -> list[SteerTestInfo]:
         return [t for t in self.tests if t.test_type == "testu01"]
+
+    def ais_tests(self) -> list[SteerTestInfo]:
+        return [t for t in self.tests if t.test_type == "ais"]
 
     def python_tests(self) -> list[SteerTestInfo]:
         return [t for t in self.tests if t.test_type == "python"]

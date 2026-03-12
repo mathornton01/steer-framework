@@ -17,11 +17,12 @@ from PyQt6.QtWidgets import (
     QSizePolicy, QApplication,
 )
 
-from theme import COLORS, set_mode, current_mode
+from theme import COLORS, set_mode, current_mode, THEMES, THEME_IDS
 from test_registry import TestRegistry, SteerTestInfo
 from test_runner import TestRunner
-from report_viewer import ReportViewer
+from report_viewer import ReportViewer, _nuanced_eval, _eval_badge
 from docs_viewer import DocsViewer
+from bit_array_dialog import BitArrayDialog
 
 CORNER_RADIUS = 16
 
@@ -34,6 +35,26 @@ PLAN_DATA_ROLE = Qt.ItemDataRole.UserRole + 1
 # "key" is the JSON parameter name the C code reads.
 # "type" is "int" or "float".
 TEST_EDITABLE_PARAMS: dict[str, list[dict]] = {
+    # NIST STS tests with test-specific parameters
+    "nist_sts_approximate_entropy": [
+        {"label": "Block len", "key": "block length", "type": "int", "default": 10, "min": 2, "max": 100},
+    ],
+    "nist_sts_block_frequency": [
+        {"label": "Block len", "key": "block length", "type": "int", "default": 128, "min": 20, "max": 100000},
+    ],
+    "nist_sts_linear_complexity": [
+        {"label": "Block len", "key": "block length", "type": "int", "default": 500, "min": 500, "max": 5000},
+    ],
+    "nist_sts_non_overlapping_template_matching": [
+        {"label": "Block len", "key": "block length", "type": "int", "default": 9, "min": 2, "max": 21},
+    ],
+    "nist_sts_overlapping_template_matching": [
+        {"label": "Block len", "key": "block length", "type": "int", "default": 9, "min": 2, "max": 21},
+    ],
+    "nist_sts_serial": [
+        {"label": "Block len", "key": "block length", "type": "int", "default": 16, "min": 2, "max": 64},
+    ],
+    # TestU01 tests
     "testu01_serial_over": [
         {"label": "Dimension", "key": "dimension", "type": "int", "default": 2, "min": 2, "max": 4},
         {"label": "Bits/value", "key": "bits per value", "type": "int", "default": 4, "min": 2, "max": 8},
@@ -210,16 +231,16 @@ class TitleBar(QWidget):
 
         layout.addStretch()
 
-        # Theme toggle button (dark/light)
-        self.theme_btn = QPushButton("☀")
-        self.theme_btn.setToolTip("Switch to light mode")
+        # Theme selector button (opens theme menu)
+        self.theme_btn = QPushButton("🎨")
+        self.theme_btn.setToolTip("Select theme")
         self.theme_btn.setStyleSheet(
             f"QPushButton {{ background: transparent; border: none; "
             f"border-radius: 8px; color: {COLORS['text_secondary']}; font-size: 13pt; "
             f"padding: 0px; min-width: 36px; min-height: 28px; max-width: 36px; max-height: 28px; }}"
             f"QPushButton:hover {{ background-color: {COLORS['bg_tertiary']}; }}"
         )
-        self.theme_btn.clicked.connect(self._toggle_theme)
+        self.theme_btn.clicked.connect(self._show_theme_menu)
         layout.addWidget(self.theme_btn)
 
         layout.addSpacing(4)
@@ -264,18 +285,23 @@ class TitleBar(QWidget):
         else:
             self._window.showMaximized()
 
-    def _toggle_theme(self):
-        new_mode = "light" if current_mode() == "dark" else "dark"
-        set_mode(new_mode)
+    def _show_theme_menu(self):
+        from PyQt6.QtWidgets import QMenu
+        menu = QMenu(self)
+        for tid, name, _ in THEMES:
+            action = menu.addAction(name)
+            action.setCheckable(True)
+            action.setChecked(tid == current_mode())
+            action.setData(tid)
+            action.triggered.connect(lambda checked, t=tid: self._apply_theme(t))
+        menu.exec(self.theme_btn.mapToGlobal(
+            self.theme_btn.rect().bottomLeft()
+        ))
+
+    def _apply_theme(self, theme_id: str):
+        set_mode(theme_id)
         from theme import STYLESHEET
         QApplication.instance().setStyleSheet(STYLESHEET)
-        # Update the toggle button icon and tooltip
-        if new_mode == "dark":
-            self.theme_btn.setText("\u2600")
-            self.theme_btn.setToolTip("Switch to light mode")
-        else:
-            self.theme_btn.setText("\u263e")
-            self.theme_btn.setToolTip("Switch to dark mode")
         # Refresh inline styles that reference COLORS
         self._window.update_inline_styles()
 
@@ -370,6 +396,7 @@ class MainWindow(QMainWindow):
         self._updating_params = False  # prevent signal recursion
         self._dynamic_param_widgets: list[tuple[dict, QWidget]] = []  # (param_def, widget)
         self.settings = QSettings("STEER", "STEER-GUI")
+        self._register_custom_tests()
 
         # Frameless window with translucent background for rounded corners
         self.setWindowFlags(
@@ -501,11 +528,18 @@ class MainWindow(QMainWindow):
         self.add_btn.clicked.connect(self._add_to_plan)
         col1_layout.addWidget(self.add_btn)
 
+        self.add_custom_btn = QPushButton("+ Add Custom Test...")
+        self.add_custom_btn.setToolTip(
+            "Register a custom test binary that implements the STEER SDK interface"
+        )
+        self.add_custom_btn.clicked.connect(self._add_custom_test)
+        col1_layout.addWidget(self.add_custom_btn)
+
         # ── Column 2: Plan + Parameters ───────────────────────────────────────
         col2 = QWidget()
         col2.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         col2_layout = QVBoxLayout(col2)
-        col2_layout.setContentsMargins(0, 0, 0, 0)
+        col2_layout.setContentsMargins(6, 0, 6, 0)
         col2_layout.setSpacing(4)
 
         col2_header = QLabel("Planned Analysis")
@@ -533,10 +567,11 @@ class MainWindow(QMainWindow):
         # Parameters (compact, within column 2)
         param_group = QGroupBox("Parameters")
         param_group.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        param_group.setMinimumWidth(0)
         param_group.setMaximumWidth(16777215)  # allow shrinking below size hint
         pg_layout = QVBoxLayout(param_group)
-        pg_layout.setSpacing(3)
-        pg_layout.setContentsMargins(4, 12, 4, 4)
+        pg_layout.setSpacing(2)
+        pg_layout.setContentsMargins(0, 8, 0, 0)
 
         self.param_test_label = QLabel("Select a planned test")
         self.param_test_label.setObjectName("statusLabel")
@@ -597,6 +632,25 @@ class MainWindow(QMainWindow):
         self._dyn_param_layout.setContentsMargins(0, 4, 0, 0)
         self._dyn_param_container.setVisible(False)
         pg_layout.addWidget(self._dyn_param_container)
+
+        # Causal model bit assignment button (hidden until a causal test is selected)
+        self._bit_config_btn = QPushButton("Configure Bit Positions…")
+        self._bit_config_btn.setToolTip(
+            "Open the interactive bit-position assignment dialog\n"
+            "for Treatment / Outcome / Covariate roles"
+        )
+        self._bit_config_btn.clicked.connect(self._open_bit_array_dialog)
+        self._bit_config_btn.setVisible(False)
+        pg_layout.addWidget(self._bit_config_btn)
+
+        # Compact label showing current bit config
+        self._bit_summary_label = QLabel()
+        self._bit_summary_label.setWordWrap(True)
+        self._bit_summary_label.setStyleSheet(
+            f"color: {COLORS['text_secondary']}; font-size: 8pt; padding: 0 2px;"
+        )
+        self._bit_summary_label.setVisible(False)
+        pg_layout.addWidget(self._bit_summary_label)
 
         param_actions = QHBoxLayout()
         self.apply_to_all_btn = QPushButton("Apply to All")
@@ -659,7 +713,7 @@ class MainWindow(QMainWindow):
         splitter.setStretchFactor(0, 0)  # col1 doesn't stretch
         splitter.setStretchFactor(1, 0)  # col2 doesn't stretch
         splitter.setStretchFactor(2, 1)  # col3 gets extra space
-        splitter.setSizes([300, 240, 560])
+        splitter.setSizes([280, 320, 600])
 
         outer_layout.addWidget(content, 1)
 
@@ -773,6 +827,15 @@ class MainWindow(QMainWindow):
                 _add_test_item(tu01_group, test, "C", COLORS["text_muted"],
                                redundant=(test.display_name in testu01_redundant))
 
+        ais_tests = self.registry.ais_tests()
+        if ais_tests:
+            ais_group = QTreeWidgetItem(self.test_tree, [
+                f"AIS 20/31 Tests ({len(ais_tests)})", ""
+            ])
+            ais_group.setExpanded(True)
+            for test in ais_tests:
+                _add_test_item(ais_group, test, "Python", COLORS["accent_highlight"])
+
         py_tests = self.registry.python_tests()
         if py_tests:
             py_group = QTreeWidgetItem(self.test_tree, [
@@ -781,6 +844,17 @@ class MainWindow(QMainWindow):
             py_group.setExpanded(True)
             for test in py_tests:
                 _add_test_item(py_group, test, "Python", COLORS["accent_highlight"])
+
+        # Custom tests
+        custom_tests = [t for t in self.registry.tests
+                        if t.program_name.startswith("custom_")]
+        if custom_tests:
+            custom_group = QTreeWidgetItem(self.test_tree, [
+                f"Custom Tests ({len(custom_tests)})", ""
+            ])
+            custom_group.setExpanded(True)
+            for test in custom_tests:
+                _add_test_item(custom_group, test, "Ext", COLORS["warning"])
 
     # ── Signals ───────────────────────────────────────────────────────────────
 
@@ -792,6 +866,8 @@ class MainWindow(QMainWindow):
         self.runner.batch_progress.connect(self._on_batch_progress)
         self.runner.batch_completed.connect(self._on_batch_completed)
         self.test_tree.itemDoubleClicked.connect(self._on_test_double_clicked)
+        self.test_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.test_tree.customContextMenuRequested.connect(self._on_tree_context_menu)
         self.plan_list.currentItemChanged.connect(self._on_plan_selection_changed)
         self.plan_list.itemClicked.connect(self._on_plan_item_clicked)
         self.bitstream_count.valueChanged.connect(self._on_param_changed)
@@ -808,6 +884,21 @@ class MainWindow(QMainWindow):
                         .replace("nist_sts_", "").replace("diehard_", "")
                         .replace("testu01_", "").replace("_test", ""))
             self.docs_viewer.select_test(test_key)
+
+    def _on_tree_context_menu(self, pos):
+        """Show context menu for the test tree (remove custom tests)."""
+        from PyQt6.QtWidgets import QMenu
+        item = self.test_tree.itemAt(pos)
+        if not item:
+            return
+        info = self._tree_item_map.get(id(item))
+        if not info or not info.program_name.startswith("custom_"):
+            return
+        menu = QMenu(self)
+        remove_action = menu.addAction(f"Remove \"{info.display_name}\"")
+        action = menu.exec(self.test_tree.viewport().mapToGlobal(pos))
+        if action == remove_action:
+            self._remove_custom_test()
 
     # ── Plan Management ───────────────────────────────────────────────────────
 
@@ -839,6 +930,12 @@ class MainWindow(QMainWindow):
                 parts.append(f"{short_key}={v:.2g}")
             else:
                 parts.append(f"{short_key}={v}")
+        # Include bit config summary for causal tests
+        bc = params.get("bit_config")
+        if bc:
+            t = ",".join(str(p) for p in bc.get("treatpos", []))
+            o = ",".join(str(p) for p in bc.get("outpos", []))
+            parts.append(f"T=[{t}] O=[{o}]")
         return f"{name} ({', '.join(parts)})"
 
     def _rebuild_dynamic_params(self, program_name: str, test_params: dict):
@@ -916,6 +1013,10 @@ class MainWindow(QMainWindow):
                 "test_params": test_params,
             }
 
+            # Add default bit config for causal tests
+            if self._is_causal_test(test_info.program_name):
+                params["bit_config"] = self._default_bit_config(test_info.program_name)
+
             plan_item = QListWidgetItem(
                 self._format_plan_label(test_info.display_name, params)
             )
@@ -942,6 +1043,8 @@ class MainWindow(QMainWindow):
         if current is None:
             self.param_test_label.setText("Select a planned test")
             self._rebuild_dynamic_params("", {})
+            self._bit_config_btn.setVisible(False)
+            self._bit_summary_label.setVisible(False)
             return
 
         self._updating_params = True
@@ -961,6 +1064,16 @@ class MainWindow(QMainWindow):
             self.level_combo.setCurrentIndex(idx)
 
         self._rebuild_dynamic_params(program_name, params.get("test_params", {}))
+
+        # Show/hide causal model bit config
+        is_causal = self._is_causal_test(program_name)
+        self._bit_config_btn.setVisible(is_causal)
+        if is_causal:
+            self._update_bit_summary(params)
+            self._bit_summary_label.setVisible(True)
+        else:
+            self._bit_summary_label.setVisible(False)
+
         self._updating_params = False
 
     def _on_plan_item_clicked(self, item):
@@ -987,6 +1100,10 @@ class MainWindow(QMainWindow):
             "report_level": self.level_combo.currentText(),
             "test_params": test_params,
         }
+        # Preserve bit config for causal tests
+        old_params = current.data(PLAN_DATA_ROLE) or {}
+        if "bit_config" in old_params:
+            params["bit_config"] = old_params["bit_config"]
         current.setData(PLAN_DATA_ROLE, params)
 
         label = current.text()
@@ -1006,6 +1123,80 @@ class MainWindow(QMainWindow):
             label = item.text()
             display_name = label.split(" (")[0] if " (" in label else label
             item.setText(self._format_plan_label(display_name, params))
+
+    # ── Causal Model Bit Config ─────────────────────────────────────────────
+
+    @staticmethod
+    def _is_causal_test(program_name: str) -> bool:
+        return program_name in ("pearl_causal_model_test", "rubin_causal_model_test")
+
+    @staticmethod
+    def _causal_model_name(program_name: str) -> str:
+        if "pearl" in program_name:
+            return "pearl"
+        return "rubin"
+
+    def _default_bit_config(self, program_name: str) -> dict:
+        cfg = {
+            "block_size": 6,
+            "treatpos": [0, 1],
+            "outpos": [2, 3, 4, 5],
+            "alphabet_size": 3,
+        }
+        if "pearl" in program_name:
+            cfg["state_bits"] = 2
+            cfg["null_simulations"] = 200
+        return cfg
+
+    def _update_bit_summary(self, params: dict):
+        bc = params.get("bit_config")
+        if not bc:
+            self._bit_summary_label.setText("No bit positions configured yet")
+            return
+        treat = ", ".join(str(p) for p in bc.get("treatpos", []))
+        out = ", ".join(str(p) for p in bc.get("outpos", []))
+        k = bc.get("alphabet_size", 2)
+        text = f"Block={bc.get('block_size', '?')}  T=[{treat}]  O=[{out}]  k={k}"
+        if "state_bits" in bc:
+            text += f"  state_bits={bc['state_bits']}"
+        if "null_simulations" in bc:
+            text += f"  sims={bc['null_simulations']}"
+        self._bit_summary_label.setText(text)
+
+    def _open_bit_array_dialog(self):
+        current = self.plan_list.currentItem()
+        if current is None:
+            return
+        program_name = current.data(TEST_INFO_ROLE) or ""
+        if not self._is_causal_test(program_name):
+            return
+
+        params = current.data(PLAN_DATA_ROLE) or {}
+        bc = params.get("bit_config") or self._default_bit_config(program_name)
+        model = self._causal_model_name(program_name)
+
+        extra = {"alphabet_size": bc.get("alphabet_size", 3)}
+        if model == "pearl":
+            extra["state_bits"] = bc.get("state_bits", 2)
+            extra["null_simulations"] = bc.get("null_simulations", 200)
+
+        dlg = BitArrayDialog(
+            model_name=model,
+            block_size=bc.get("block_size", 6),
+            treatpos=bc.get("treatpos", [0, 1]),
+            outpos=bc.get("outpos", [2, 3, 4, 5]),
+            extra=extra,
+            parent=self,
+        )
+        if dlg.exec() == dlg.DialogCode.Accepted:
+            result = dlg.get_result()
+            params["bit_config"] = result
+            current.setData(PLAN_DATA_ROLE, params)
+            self._update_bit_summary(params)
+            # Update plan label
+            label = current.text()
+            display_name = label.split(" (")[0] if " (" in label else label
+            current.setText(self._format_plan_label(display_name, params))
 
     # ── Actions ───────────────────────────────────────────────────────────────
 
@@ -1061,6 +1252,42 @@ class MainWindow(QMainWindow):
                     "data type": "unsigned 64-bit integer",
                     "value": str(value),
                 })
+        # Add causal model bit config parameters
+        bc = params.get("bit_config")
+        if bc:
+            param_list.append({
+                "name": "subsequence size",
+                "data type": "signed 32-bit integer",
+                "value": str(bc.get("block_size", 6)),
+            })
+            param_list.append({
+                "name": "treatment positions",
+                "data type": "utf-8 string",
+                "value": ",".join(str(p) for p in bc.get("treatpos", [0, 1])),
+            })
+            param_list.append({
+                "name": "outcome positions",
+                "data type": "utf-8 string",
+                "value": ",".join(str(p) for p in bc.get("outpos", [2, 3, 4, 5])),
+            })
+            param_list.append({
+                "name": "alphabet size",
+                "data type": "signed 32-bit integer",
+                "value": str(bc.get("alphabet_size", 3)),
+            })
+            if "state_bits" in bc:
+                param_list.append({
+                    "name": "state bits",
+                    "data type": "signed 32-bit integer",
+                    "value": str(bc.get("state_bits", 2)),
+                })
+            if "null_simulations" in bc:
+                param_list.append({
+                    "name": "null simulations",
+                    "data type": "signed 32-bit integer",
+                    "value": str(bc.get("null_simulations", 200)),
+                })
+
         return {
             "parameter set": {
                 "test name": test_info.display_name.lower(),
@@ -1159,15 +1386,15 @@ class MainWindow(QMainWindow):
             self._log(f"    {line}")
 
     def _on_test_completed(self, test_name, exit_code, report_path):
-        status = "PASS" if exit_code == 0 else f"FAIL (exit code {exit_code})"
-        self._log(f"  {test_name}: {status}")
-
         try:
-            report = json.loads(Path(report_path).read_text())
-            evaluation = report.get("report", {}).get("evaluation", "?")
-            self._log(f"    Evaluation: {evaluation}")
+            report_data = json.loads(Path(report_path).read_text())
+            report = report_data.get("report", report_data)
+            evaluation = _nuanced_eval(report)
+            badge_text, _ = _eval_badge(evaluation)
+            self._log(f"  {test_name}: {badge_text}")
         except Exception:
-            pass
+            status = "PASS" if exit_code == 0 else f"FAIL (exit code {exit_code})"
+            self._log(f"  {test_name}: {status}")
 
         self._log("")
         self._batch_results.append((test_name, exit_code, report_path))
@@ -1216,9 +1443,153 @@ class MainWindow(QMainWindow):
         geom = self.settings.value("geometry")
         if geom:
             self.restoreGeometry(geom)
+        # Restore saved theme
+        saved_theme = self.settings.value("theme", "dark")
+        if saved_theme != current_mode() and saved_theme in THEME_IDS:
+            set_mode(saved_theme)
+            from theme import STYLESHEET
+            QApplication.instance().setStyleSheet(STYLESHEET)
 
     def closeEvent(self, event):
         self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("theme", current_mode())
         if self.runner.is_running():
             self.runner.stop()
         super().closeEvent(event)
+
+    # ── Custom Test Management ────────────────────────────────────────────────
+
+    def _load_custom_tests(self) -> list[dict]:
+        """Load custom test definitions from QSettings."""
+        data = self.settings.value("custom_tests", [])
+        if not isinstance(data, list):
+            return []
+        return data
+
+    def _save_custom_tests(self, tests: list[dict]):
+        """Persist custom test definitions to QSettings."""
+        self.settings.setValue("custom_tests", tests)
+
+    def _register_custom_tests(self):
+        """Register saved custom tests into the registry and tree."""
+        for entry in self._load_custom_tests():
+            self._register_one_custom(entry)
+
+    def _register_one_custom(self, entry: dict):
+        """Add a single custom test to the registry (doesn't touch settings)."""
+        name = entry.get("name", "Custom Test")
+        exe = entry.get("executable", "")
+        test_type = entry.get("test_type", "nist-sts")
+        program_name = f"custom_{name.lower().replace(' ', '_')}"
+        # Avoid duplicates
+        if any(t.program_name == program_name for t in self.registry.tests):
+            return
+        info = SteerTestInfo(
+            display_name=name,
+            program_name=program_name,
+            test_type=test_type,
+            executable_path=exe,
+            is_available=bool(exe and Path(exe).exists()),
+        )
+        self.registry.tests.append(info)
+
+    def _add_custom_test(self):
+        """Show dialog to register a custom test binary."""
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Add Custom Test")
+        dlg.setMinimumWidth(420)
+        layout = QVBoxLayout(dlg)
+
+        # Name
+        layout.addWidget(QLabel("Test display name:"))
+        name_edit = QLineEdit()
+        name_edit.setPlaceholderText("e.g. My Custom Test")
+        layout.addWidget(name_edit)
+
+        # Executable path
+        layout.addWidget(QLabel("Path to executable / script:"))
+        exe_row = QHBoxLayout()
+        exe_edit = QLineEdit()
+        exe_edit.setPlaceholderText("Select binary implementing the STEER SDK interface...")
+        exe_row.addWidget(exe_edit, 1)
+        browse_btn = QPushButton("Browse")
+        def _browse():
+            path, _ = QFileDialog.getOpenFileName(
+                dlg, "Select Test Executable", "",
+                "Executables (*.exe *.sh *.py);;All Files (*)"
+            )
+            if path:
+                exe_edit.setText(path)
+        browse_btn.clicked.connect(_browse)
+        exe_row.addWidget(browse_btn)
+        layout.addLayout(exe_row)
+
+        # Test type
+        layout.addWidget(QLabel("Test type:"))
+        type_combo = QComboBox()
+        type_combo.addItems(["nist-sts", "diehard", "testu01", "python"])
+        layout.addWidget(type_combo)
+
+        # Help text
+        help_lbl = QLabel(
+            "The binary must accept STEER CLI arguments:\n"
+            "  -l <level> -e <entropy> -p <params.json> -r <report.json> -R\n"
+            "See the STEER Developer Guide for the full SDK interface."
+        )
+        help_lbl.setObjectName("statusLabel")
+        help_lbl.setWordWrap(True)
+        layout.addWidget(help_lbl)
+
+        btns = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        btns.accepted.connect(dlg.accept)
+        btns.rejected.connect(dlg.reject)
+        layout.addWidget(btns)
+
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        name = name_edit.text().strip()
+        exe_path = exe_edit.text().strip()
+        if not name or not exe_path:
+            QMessageBox.warning(self, "Missing Info",
+                                "Please provide both a name and executable path.")
+            return
+
+        entry = {
+            "name": name,
+            "executable": exe_path,
+            "test_type": type_combo.currentText(),
+        }
+
+        custom_tests = self._load_custom_tests()
+        custom_tests.append(entry)
+        self._save_custom_tests(custom_tests)
+        self._register_one_custom(entry)
+        self._populate_test_tree()
+        self._update_status_bar()
+
+    def _remove_custom_test(self):
+        """Remove selected custom test(s) from the tree."""
+        selected = self.test_tree.selectedItems()
+        custom_tests = self._load_custom_tests()
+        removed = False
+        for item in selected:
+            info = self._tree_item_map.get(id(item))
+            if info and info.program_name.startswith("custom_"):
+                display = info.display_name
+                custom_tests = [
+                    e for e in custom_tests if e.get("name") != display
+                ]
+                self.registry.tests = [
+                    t for t in self.registry.tests
+                    if t.program_name != info.program_name
+                ]
+                removed = True
+        if removed:
+            self._save_custom_tests(custom_tests)
+            self._populate_test_tree()
+            self._update_status_bar()

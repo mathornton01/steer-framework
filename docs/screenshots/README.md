@@ -1,23 +1,24 @@
-# Screenshot Placeholders
+# STEER GUI Screenshots
 
-Replace the placeholder images below with actual screenshots of the STEER GUI.
+14 screenshots of the STEER GUI application showcasing different views and color themes.
 
-## Required Screenshots
+## Screenshot Files
 
-| Filename | Description | Suggested Dimensions |
-|----------|-------------|---------------------|
-| `gui-main-window.png` | Full main window showing all three columns | 1200x800 |
-| `gui-test-selection.png` | Available Tests tree expanded with tests selected, some added to plan | 1200x800 |
-| `gui-parameters.png` | Parameter editing panel with common + test-specific params visible | 1200x800 |
-| `gui-running.png` | Test run in progress with progress bar and log output | 1200x800 |
-| `gui-results-summary.png` | Results tab showing Summary with PASS/FAIL badge and values | 1200x800 |
-| `gui-results-details.png` | Results tab showing Details hierarchical tree view | 1200x800 |
-| `gui-documentation.png` | Documentation tab with a test selected and docs displayed | 1200x800 |
+| Filename | Description |
+|----------|-------------|
+| `gui-screenshot-01.png` | GUI view 1 |
+| `gui-screenshot-02.png` | GUI view 2 |
+| `gui-screenshot-03.png` | GUI view 3 |
+| `gui-screenshot-04.png` | GUI view 4 |
+| `gui-screenshot-05.png` | GUI view 5 |
+| `gui-screenshot-06.png` | GUI view 6 |
+| `gui-screenshot-07.png` | GUI view 7 |
+| `gui-screenshot-08.png` | GUI view 8 |
+| `gui-screenshot-09.png` | GUI view 9 |
+| `gui-screenshot-10.png` | GUI view 10 |
+| `gui-screenshot-11.png` | GUI view 11 |
+| `gui-screenshot-12.png` | GUI view 12 |
+| `gui-screenshot-13.png` | GUI view 13 |
+| `gui-screenshot-14.png` | GUI view 14 |
 
-## Tips for Taking Screenshots
-
-1. Launch the GUI: `python src/steer-gui/main.py`
-2. Use the dark theme (default) for consistent appearance
-3. Resize the window to approximately 1200x800 pixels
-4. Use Win+Shift+S (Windows) or Cmd+Shift+4 (macOS) for clean captures
-5. Save as PNG format for best quality
+These screenshots are used in the carousel on the main website (`index.md`).
