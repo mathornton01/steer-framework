@@ -1,24 +1,15 @@
 # STEER GUI Screenshots
 
-14 screenshots of the STEER GUI application showcasing different views and color themes.
+5 screenshots of the STEER GUI application showcasing key views.
 
 ## Screenshot Files
 
 | Filename | Description |
 |----------|-------------|
-| `gui-screenshot-01.png` | GUI view 1 |
-| `gui-screenshot-02.png` | GUI view 2 |
-| `gui-screenshot-03.png` | GUI view 3 |
-| `gui-screenshot-04.png` | GUI view 4 |
-| `gui-screenshot-05.png` | GUI view 5 |
-| `gui-screenshot-06.png` | GUI view 6 |
-| `gui-screenshot-07.png` | GUI view 7 |
-| `gui-screenshot-08.png` | GUI view 8 |
-| `gui-screenshot-09.png` | GUI view 9 |
-| `gui-screenshot-10.png` | GUI view 10 |
-| `gui-screenshot-11.png` | GUI view 11 |
-| `gui-screenshot-12.png` | GUI view 12 |
-| `gui-screenshot-13.png` | GUI view 13 |
-| `gui-screenshot-14.png` | GUI view 14 |
+| `MainWindow.png` | Main window — three-panel layout with test browser, parameters, and results |
+| `TestSelection.png` | Test selection — browsing and selecting tests across all batteries |
+| `TestExecution.png` | Test execution — real-time progress tracking with live output |
+| `TestResults1.png` | Results summary — pass/fail evaluation with probability values |
+| `TestResults2.png` | Detailed results — hierarchical breakdown of configurations and criteria |
 
 These screenshots are used in the carousel on the main website (`index.md`).
