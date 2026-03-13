@@ -446,6 +446,17 @@ hr {
   color: var(--accent-gold);
 }
 
+.battery-card.full-width {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px 24px;
+  font-size: 1.05em;
+}
+
+.battery-card.full-width .count {
+  font-size: 2rem;
+}
+
 /* -- Screenshot Carousel -------------------------------------------------- */
 
 .carousel-section {

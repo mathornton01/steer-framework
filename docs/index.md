@@ -46,7 +46,25 @@ title: Anametric STEER
 
 ---
 
+<div class="causal-highlight">
+  <h3><span class="badge">New</span> Causal Inference Test Battery</h3>
+  <p>
+    <strong>Pearl Causal Model (PCM)</strong> — Structural causal modeling detects directional dependencies in bitstreams that violate randomness assumptions.
+  </p>
+  <p>
+    <strong>Rubin Causal Model (RCM)</strong> — Potential outcomes framework identifies treatment-effect-like deviations across bitstream subpopulations.
+  </p>
+  <p style="margin-top:12px; font-size:0.82rem; color:var(--text-muted);">
+    These tests detect failure modes that purely statistical batteries may miss.
+  </p>
+</div>
+
 <div class="battery-grid">
+  <div class="battery-card featured full-width">
+    <h4>Causal Models</h4>
+    <p><span class="count">2</span> tests</p>
+    <p>Pearl &amp; Rubin causal inference — <em>Anametric innovation.</em></p>
+  </div>
   <div class="battery-card">
     <h4>NIST STS</h4>
     <p><span class="count">15</span> tests</p>
@@ -67,24 +85,6 @@ title: Anametric STEER
     <p><span class="count">9</span> tests</p>
     <p>BSI Procedure A &amp; B — German federal entropy certification.</p>
   </div>
-  <div class="battery-card featured">
-    <h4>Causal Models</h4>
-    <p><span class="count">2</span> tests</p>
-    <p>Pearl &amp; Rubin causal inference — <em>Anametric innovation.</em></p>
-  </div>
-</div>
-
-<div class="causal-highlight">
-  <h3><span class="badge">New</span> Causal Inference Test Battery</h3>
-  <p>
-    <strong>Pearl Causal Model (PCM)</strong> — Structural causal modeling detects directional dependencies in bitstreams that violate randomness assumptions.
-  </p>
-  <p>
-    <strong>Rubin Causal Model (RCM)</strong> — Potential outcomes framework identifies treatment-effect-like deviations across bitstream subpopulations.
-  </p>
-  <p style="margin-top:12px; font-size:0.82rem; color:var(--text-muted);">
-    These tests detect failure modes that purely statistical batteries may miss.
-  </p>
 </div>
 
 ---
